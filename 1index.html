@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Ассистент доставки</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+        }
+        #app {
+            max-width: 420px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            min-height: 680px;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: #2A4B7C;
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            flex: 1;
+        }
+        .back-btn, .menu-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .back-btn:hover, .menu-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 130px);
+        }
+        .menu-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .menu-row {
+            display: flex;
+            gap: 12px;
+        }
+        .menu-row .menu-btn-large {
+            flex: 1;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 16px;
+            padding: 20px 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #2A4B7C;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .menu-row .menu-btn-large:hover {
+            background: #e9ecef;
+        }
+        .menu-row .menu-btn-large span {
+            font-size: 1.8rem;
+        }
+        .list-item {
+            background: #f8f9fa;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .list-item-title {
+            font-weight: 500;
+            color: #212529;
+        }
+        .list-item-sub {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+        .badge {
+            background: #2A4B7C;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+        .badge-success {
+            background: #28a745;
+        }
+        .button {
+            background: #2A4B7C;
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 500;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 12px;
+        }
+        .button-secondary {
+            background: #6c757d;
+        }
+        .button-outline {
+            background: white;
+            border: 1px solid #2A4B7C;
+            color: #2A4B7C;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #495057;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        .checklist-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .checklist-item .status {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: #f1f3f5;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .checklist-item .text {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        .status.ok {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.problem {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .comment-box {
+            background: #f1f3f5;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        .photo-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .photo-item {
+            background: #f8f9fa;
+            border: 1px dashed #adb5bd;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .photo-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .photo-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .mt-2 {
+            margin-top: 8px;
+        }
+        .mt-4 {
+            margin-top: 24px;
+        }
+        .flex-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .watermark {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <button class="back-btn" id="backBtn" style="visibility: hidden;">←</button>
+            <h1 id="headerTitle">Ассистент доставки</h1>
+            <button class="menu-btn" id="menuBtn">☰</button>
+        </div>
+        <div class="content" id="content"></div>
+    </div>
+
+    <script>
+        // ---------- Константы из бота ----------
+        const RESTAURANTS = [
+            "Т.00 Тестовый", "Т.02 Пятницкая", "Т.03 Щёлковская", "Т.04 НОП (Народного ополчения)",
+            "Т.05 Пр.Мира", "Т.06 Варшавка Тануки", "Т.07 Варшавка Ерш", "Т.08 Щербаковская",
+            "Т.09 Симоновский вал", "Т.10 Алтуфьево", "Т.11 Генерала Белова", "Т.13 Воронеж",
+            "Т.15 Шоссе Энтузиастов", "Т.16 Волгоградка 1 (д.17)", "Т.17 Перерва Тануки",
+            "Т.18 Перерва Ерш", "Т.21 Каширское шоссе", "Т.22 Самара", "Т.24 Балаклавка Тануки",
+            "Т.28 Боровка Тануки", "Т.29 Боровка Ерш", "Т.30 Шокальского", "Т.33 Можайское шоссе",
+            "Т.34 Шаболовка", "Т.35 Коштоянца", "Т.36 Привольная (Жулебино)", "Т.37 Митино",
+            "Т.40 Свобода", "Т.41 Мытищи", "Т.42 Коньково (Профсоюзная)", "Т.44 Люберцы",
+            "Т.45 Преображенка", "Т.46 Паустовского (Ясенево)", "Т.47 3‑я Владимирская (Перово)",
+            "Т.48 Новокосино", "Т.49 Петрозаводская", "Т.50 Дмитровка 1 (д.64)", "Т.52 Сущевка",
+            "Т.53 Волгоградка 2 (д.98)", "Т.55 Липецкая Тануки", "Т.56 Екатеринбург 2",
+            "Т.57 Липецкая Ерш", "Т.58 Мосфильм", "Т.59 Химки", "Т.60 Б.Академическая",
+            "Т.61 Зеленоград", "Т.62 Космонавтов Ерш", "Т.63 Космонавтов Тануки", "Т.65 Краснодар",
+            "Т.66 Пришвина Тануки", "Т.67 Пришвина Ерш", "Т.69 Бутово", "Т.71 Дмитровка 2 (д.108Б)",
+            "Т.72 Нахимовский пр‑т", "Т.73 Н.Новгород", "Т.74 Уфа", "Т.75 Реутов",
+            "Т.76 Борисовские пруды", "Т.77 Красногорск", "Т.78 Рязанский пр‑т", "Т.79 Одинцово",
+            "Т.80 Подольск", "Т.81 Куркино", "Т.82 Кунцево", "Т.83 Б.Златоустинский (Лубянка)",
+            "Т.85 Ярославка", "Т.86 Алматы Достык", "Т.87 Осенний бульвар", "Т.88 Чертановская",
+            "Т.89 Долгопрудный", "Т.90 Королёв", "Т.91 Цветной бульвар", "Т.92 Балашиха",
+            "Т.93 Казань", "Т.94 Краснодар 2", "Т.95 Метрополис", "Т.96 Красная Пресня",
+            "Т.97 Москва‑Сити", "Т.100 Земляной вал", "Т.101 Б.Якиманка", "Т.102 Строгино",
+            "Т.103 Алматы Розыбакиева", "Т.104 Астана Мангилик Ел", "Т.105 Казань Каспийка",
+            "Т.107 Богданова Каспийка", "Т.108 Богданова (Солнцево)", "Т.109 Ташкент Тараса Шевченко",
+            "Т.110 Алматы Шевченко", "Т.114 Ташкент сити молл", "Т.115 Домодедово",
+            "Т.117 Алматы Сатпаева", "Т.118 Алматы Сейфулина", "Т.119 Астана Туран",
+            "Т.123 Щелково", "Т.124 Солнечногорск", "К.105 Казань Каспийка", "К.107 Богданова Каспийка",
+            "К.116 Ташкент сити молл", "К.121 Ташкент Тараса Шевченко", "В.120 Алматы Сейфулина",
+            "В.122 Астана"
+        ];
+
+        // Транспортные средства из vehicles.xlsx
+        const VEHICLES_DATA = [
+            { model: "Renault Sandero", plate: "А463УА799", restaurant: "Т.17 Перерва Тануки" },
+            { model: "Renault Sandero", plate: "Е332ОА799", restaurant: "Т.17 Перерва Тануки" },
+            { model: "Renault Sandero", plate: "К631МТ799", restaurant: "Т.17 Перерва Тануки" },
+            { model: "Renault Sandero", plate: "К640МТ799", restaurant: "Т.17 Перерва Тануки" },
+            { model: "Renault Sandero", plate: "О304ОК799", restaurant: "Т.17 Перерва Тануки" },
+            { model: "Renault Sandero", plate: "О311ОК799", restaurant: "Т.17 Перерва Тануки" },
+            { model: "Renault Sandero", plate: "Т483ТС799", restaurant: "Т.17 Перерва Тануки" },
+            { model: "Электровелосипед", plate: "АА031О", restaurant: "Т.37 Митино" },
+            { model: "Электровелосипед", plate: "АА032О", restaurant: "Т.37 Митино" },
+            { model: "Электровелосипед", plate: "АА077О", restaurant: "Т.37 Митино" },
+            { model: "Электровелосипед", plate: "АА088О", restaurant: "Т.37 Митино" },
+            { model: "Renault Sandero", plate: "К534МТ799", restaurant: "Т.37 Митино" },
+            { model: "Renault Sandero", plate: "Н202УТ799", restaurant: "Т.37 Митино" },
+            { model: "Renault Sandero", plate: "Н839КТ799", restaurant: "Т.37 Митино" },
+            { model: "Ravon R2", plate: "О615АТ799", restaurant: "Т.37 Митино" },
+            { model: "Lada Granta", plate: "Р236КР977", restaurant: "Т.37 Митино" },
+            { model: "Lada Granta", plate: "Р334КТ977", restaurant: "Т.37 Митино" },
+            { model: "Lada Granta", plate: "Р340КР977", restaurant: "Т.37 Митино" },
+            { model: "Lada Granta", plate: "Т304КМ977", restaurant: "Т.37 Митино" },
+            { model: "Lada Granta", plate: "Т346КМ977", restaurant: "Т.37 Митино" },
+            { model: "Lada Granta", plate: "Т382КМ977", restaurant: "Т.37 Митино" },
+            { model: "Ravon R2", plate: "Т889УР777", restaurant: "Т.37 Митино" },
+            { model: "Ravon R2", plate: "У743УК777", restaurant: "Т.37 Митино" },
+            { model: "Скутер", plate: "нет номера", restaurant: "Т.37 Митино" },
+            { model: "Велосипед", plate: "нет номера", restaurant: "Т.81 Куркино" },
+            { model: "Renault Sandero", plate: "К211ТМ799", restaurant: "Т.81 Куркино" },
+            { model: "Renault Sandero", plate: "К450ТМ799", restaurant: "Т.81 Куркино" },
+            { model: "Ravon R2", plate: "Н876УК777", restaurant: "Т.81 Куркино" },
+            { model: "Lada Granta", plate: "Р338КР977", restaurant: "Т.81 Куркино" },
+            { model: "Renault Sandero", plate: "Р368НТ799", restaurant: "Т.81 Куркино" },
+            { model: "Renault Sandero", plate: "Р398НТ799", restaurant: "Т.81 Куркино" },
+            { model: "Renault Sandero", plate: "Т662ТА799", restaurant: "Т.81 Куркино" },
+            { model: "Ravon R2", plate: "Т945УР777", restaurant: "Т.81 Куркино" },
+            { model: "Электровелосипед", plate: "нет номера", restaurant: "Т.81 Куркино" },
+            { model: "Renault Sandero", plate: "А434УА799", restaurant: "Т.61 Зеленоград" },
+            { model: "Renault Sandero", plate: "К628МТ799", restaurant: "Т.61 Зеленоград" },
+            { model: "Renault Sandero", plate: "К687МХ799", restaurant: "Т.61 Зеленоград" },
+            { model: "Renault Sandero", plate: "К908РО799", restaurant: "Т.61 Зеленоград" },
+            { model: "Ravon R2", plate: "Н883УК777", restaurant: "Т.61 Зеленоград" },
+            { model: "Ravon R2", plate: "О818АТ799", restaurant: "Т.61 Зеленоград" },
+            { model: "Renault Sandero", plate: "Т923СА799", restaurant: "Т.61 Зеленоград" },
+            { model: "Велосипед", plate: "нет номера", restaurant: "Т.61 Зеленоград" },
+            { model: "Велосипед", plate: "нет номера", restaurant: "Т.61 Зеленоград" },
+            { model: "Велосипед", plate: "нет номера", restaurant: "Т.61 Зеленоград" },
+            { model: "Lada Granta", plate: "Е837КТ977", restaurant: "Т.40 Свобода" },
+            { model: "Renault Sandero", plate: "К669МХ799", restaurant: "Т.40 Свобода" },
+            { model: "Lada Granta", plate: "М232КТ977", restaurant: "Т.40 Свобода" },
+            { model: "Renault Sandero", plate: "Н812КТ799", restaurant: "Т.40 Свобода" },
+            { model: "Lada Granta", plate: "Т196КМ977", restaurant: "Т.40 Свобода" },
+            { model: "Renault Sandero", plate: "Е414МЕ799", restaurant: "Т.59 Химки" },
+            { model: "Renault Sandero", plate: "К580МХ799", restaurant: "Т.59 Химки" },
+            { model: "Renault Sandero", plate: "О297ОК799", restaurant: "Т.59 Химки" },
+            { model: "Lada Granta", plate: "Р093КР977", restaurant: "Т.59 Химки" },
+            { model: "Lada Granta", plate: "Р314КР977", restaurant: "Т.59 Химки" },
+            { model: "Lada Granta", plate: "Р353КР977", restaurant: "Т.59 Химки" },
+            { model: "Renault Sandero", plate: "Р384НТ799", restaurant: "Т.59 Химки" },
+            { model: "Renault Sandero", plate: "Р397НТ799", restaurant: "Т.59 Химки" },
+            { model: "Ravon R2", plate: "Р668СТ777", restaurant: "Т.59 Химки" },
+            { model: "Renault Sandero", plate: "Т426ТС799", restaurant: "Т.59 Химки" },
+            { model: "Электровелосипед", plate: "ААО830", restaurant: "Т.77 Красногорск" },
+            { model: "Renault Sandero", plate: "К925РО799", restaurant: "Т.77 Красногорск" },
+            { model: "Renault Sandero", plate: "Н317УТ799", restaurant: "Т.77 Красногорск" },
+            { model: "Ravon R2", plate: "Р782НЕ797", restaurant: "Т.77 Красногорск" },
+            { model: "Ravon R2", plate: "Р978ВА799", restaurant: "Т.77 Красногорск" },
+            { model: "Lada Granta", plate: "Т385КМ977", restaurant: "Т.77 Красногорск" },
+            { model: "Lada Granta", plate: "Т393КМ977", restaurant: "Т.77 Красногорск" },
+            { model: "Renault Sandero", plate: "Т625ТА799", restaurant: "Т.77 Красногорск" },
+            { model: "Renault Sandero", plate: "Т944ТА799", restaurant: "Т.77 Красногорск" },
+            { model: "Renault Sandero", plate: "Т946ТА799", restaurant: "Т.77 Красногорск" },
+            { model: "Электровелосипед", plate: "ААО330", restaurant: "Т.74 Уфа" },
+            { model: "Электровелосипед", plate: "ААО340", restaurant: "Т.74 Уфа" },
+            { model: "Электровелосипед", plate: "ААО350", restaurant: "Т.74 Уфа" },
+            { model: "Электровелосипед", plate: "ААО360", restaurant: "Т.00 Тестовый" },
+            { model: "Renault Sandero", plate: "М788КК799", restaurant: "Т.102 Строгино" },
+            { model: "Renault Sandero", plate: "М811КК799", restaurant: "Т.102 Строгино" },
+            { model: "Lada Granta", plate: "Р166КР977", restaurant: "Т.102 Строгино" },
+            { model: "Lada Granta", plate: "Р303КР977", restaurant: "Т.102 Строгино" },
+            { model: "Электровелосипед", plate: "ААО760", restaurant: "Т.95 Метрополис" },
+            { model: "Электровелосипед", plate: "ААО820", restaurant: "Т.95 Метрополис" },
+            { model: "Renault Sandero", plate: "К043ТМ799", restaurant: "Т.95 Метрополис" },
+            { model: "Renault Sandero", plate: "К409ТМ799", restaurant: "Т.95 Метрополис" },
+            { model: "Lada Granta", plate: "Р227КР977", restaurant: "Т.95 Метрополис" },
+            { model: "Lada Granta", plate: "Р300КР977", restaurant: "Т.95 Метрополис" },
+            { model: "Электровелосипед", plate: "ААО 410", restaurant: "Т.85 Ярославка" },
+            { model: "Электровелосипед", plate: "ААО 420", restaurant: "Т.85 Ярославка" },
+            { model: "Lada Granta", plate: "Р237КР977", restaurant: "Т.85 Ярославка" },
+            { model: "Lada Granta", plate: "Р308КР977", restaurant: "Т.85 Ярославка" },
+            { model: "Ravon R2", plate: "Р565ВА799", restaurant: "Т.85 Ярославка" },
+            { model: "Ravon R2", plate: "Р579ВА799", restaurant: "Т.85 Ярославка" },
+            { model: "Lada Granta", plate: "нет номера", restaurant: "Т.124 Солнечногорск" },
+            { model: "Lada Granta", plate: "нет номера", restaurant: "Т.124 Солнечногорск" }
+        ];
+
+        // Пункты проверки ТС (17)
+        const CHECK_POINTS = [
+            "Состояние пленки/лакокрасочного покрытия",
+            "Состояние брендированных наклеек",
+            "Состояние шин и их износа (шины установлены согласно сезонности)",
+            "Состояние колесных дисков",
+            "Состояние осветительных приборов (габаритные огни, ближний/дальний свет, указатели поворота, стоп сигналы, сигналы аварийной остановки)",
+            "Состояние стекла и зеркал",
+            "Чистота кузова",
+            "Чистота салона",
+            "Термосумка отсутствует",
+            "Чистота багажника",
+            "Наличие набора автомобилиста (аптечка с установленным сроком годности, огнетушитель с установленным датчиком давления, знак аварийной остановки)",
+            "Состояние запасного колеса",
+            "Наличие домкрата",
+            "Уровень масла в двигателе",
+            "Уровень охлаждающей жидкости",
+            "Уровень тормозной жидкости",
+            "Двигатель запускается с первого раза, отсутствуют звуки неисправности"
+        ];
+
+        // Блоки доставки (11)
+        const DELIVERY_BLOCKS = [
+            { name: "Санитарно-техническое состояние помещения, освещение", points: 6 },
+            { name: "Упаковка", points: 3 },
+            { name: "Термосумки", points: 4 },
+            { name: "Условия хранения соусов/топпингов, маркировка", points: 3 },
+            { name: "Техническое оборудование", points: 4 },
+            { name: "Блюда/Напитки", points: 3 },
+            { name: "Сотрудники", points: 5 },
+            { name: "Курьеры", points: 2 },
+            { name: "Документы ТС", points: 1 },
+            { name: "ITSM, Яндекс заправки, 1С авто", points: 3 },
+            { name: "Стоп-лист, стандарты", points: 2 }
+        ];
+
+        // ---------- Глобальное состояние приложения ----------
+        let currentUser = null;                // объект пользователя
+        let currentScreen = 'mainMenu';        // текущий экран
+        let currentVehicle = null;             // выбранное ТС для проверки
+        let vehiclePhotos = [null, null, null, null, null, null]; // 6 фото (dataURL)
+        let vehicleChecklist = {};              // { index: 'ok'/'problem' }
+        let problemComments = {};                // { index: 'текст' }
+        let problemPhotos = {};                  // { index: dataURL }
+        let currentProblemIndex = null;          // для последовательного ввода
+        let deliveryBlocksDone = [];              // названия блоков, завершённых в текущей сессии
+        let currentDeliveryBlockIndex = null;     // индекс выбранного блока
+        let currentDeliveryPoint = 0;              // текущий пункт в блоке
+
+        // ---------- Инициализация ----------
+        function loadUser() {
+            const user = localStorage.getItem('currentUser');
+            if (user) {
+                currentUser = JSON.parse(user);
+            } else {
+                currentUser = null;
+            }
+        }
+
+        function saveUser(user) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            currentUser = user;
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            navigate('mainMenu');
+        }
+
+        // Получить ТС для ресторана пользователя
+        function getVehiclesForRestaurant() {
+            if (!currentUser) return [];
+            return VEHICLES_DATA.filter(v => v.restaurant === currentUser.restaurant);
+        }
+
+        // Получить список проверенных сегодня ТС (из localStorage)
+        function getCheckedVehiclesToday() {
+            if (!currentUser) return [];
+            const key = `checked_${currentUser.restaurant}_${new Date().toLocaleDateString('ru-RU')}`;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        // Отметить ТС как проверенное сегодня
+        function markVehicleChecked(plate) {
+            const key = `checked_${currentUser.restaurant}_${new Date().toLocaleDateString('ru-RU')}`;
+            const checked = getCheckedVehiclesToday();
+            if (!checked.includes(plate)) {
+                checked.push(plate);
+                localStorage.setItem(key, JSON.stringify(checked));
+            }
+        }
+
+        // Проверка, все ли ТС проверены сегодня
+        function allVehiclesChecked() {
+            const vehicles = getVehiclesForRestaurant();
+            const checked = getCheckedVehiclesToday();
+            return vehicles.length > 0 && vehicles.every(v => checked.includes(v.plate));
+        }
+
+        // Получить проверенные блоки доставки сегодня
+        function getCheckedDeliveryBlocks() {
+            if (!currentUser) return [];
+            const key = `delivery_${currentUser.restaurant}_${new Date().toLocaleDateString('ru-RU')}`;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        // Отметить блок как проверенный
+        function markDeliveryBlockChecked(blockName) {
+            const key = `delivery_${currentUser.restaurant}_${new Date().toLocaleDateString('ru-RU')}`;
+            const checked = getCheckedDeliveryBlocks();
+            if (!checked.includes(blockName)) {
+                checked.push(blockName);
+                localStorage.setItem(key, JSON.stringify(checked));
+            }
+        }
+
+        // Все блоки проверены?
+        function allDeliveryBlocksChecked() {
+            const checked = getCheckedDeliveryBlocks();
+            return DELIVERY_BLOCKS.every(b => checked.includes(b.name));
+        }
+
+        // Навигация
+        function navigate(screen, param = null) {
+            currentScreen = screen;
+            render(param);
+        }
+
+        // ---------- Рендеринг ----------
+        function render(param) {
+            const content = document.getElementById('content');
+            const headerTitle = document.getElementById('headerTitle');
+            const backBtn = document.getElementById('backBtn');
+            const menuBtn = document.getElementById('menuBtn');
+
+            // Управление видимостью кнопки назад
+            if (currentScreen === 'mainMenu' || currentScreen === 'register') {
+                backBtn.style.visibility = 'hidden';
+            } else {
+                backBtn.style.visibility = 'visible';
+            }
+
+            if (!currentUser && currentScreen !== 'register' && currentScreen !== 'mainMenu') {
+                navigate('register');
+                return;
+            }
+
+            switch (currentScreen) {
+                case 'mainMenu':
+                    headerTitle.innerText = 'Главное меню';
+                    renderMainMenu(content);
+                    break;
+                case 'register':
+                    headerTitle.innerText = 'Регистрация';
+                    renderRegister(content);
+                    break;
+                case 'restaurantOpen':
+                    headerTitle.innerText = 'Открытие ресторана';
+                    renderRestaurantOpen(content);
+                    break;
+                case 'vehicleList':
+                    headerTitle.innerText = 'Проверка ТС';
+                    renderVehicleList(content);
+                    break;
+                case 'vehiclePhotos':
+                    headerTitle.innerText = 'Фото ТС';
+                    renderVehiclePhotos(content);
+                    break;
+                case 'vehicleChecklist':
+                    headerTitle.innerText = 'Чек-лист ТС';
+                    renderVehicleChecklist(content);
+                    break;
+                case 'vehicleProblemComment':
+                    headerTitle.innerText = 'Комментарий к проблеме';
+                    renderProblemComment(content, param);
+                    break;
+                case 'vehicleProblemPhoto':
+                    headerTitle.innerText = 'Фото проблемы';
+                    renderProblemPhoto(content, param);
+                    break;
+                case 'deliveryBlocks':
+                    headerTitle.innerText = 'Проверка доставки';
+                    renderDeliveryBlocks(content);
+                    break;
+                case 'deliveryBlockDetail':
+                    headerTitle.innerText = 'Блок доставки';
+                    renderDeliveryBlockDetail(content, param);
+                    break;
+                case 'deliveryComment':
+                    headerTitle.innerText = 'Комментарий';
+                    renderDeliveryComment(content, param);
+                    break;
+                case 'knowledgeBase':
+                    headerTitle.innerText = 'База знаний';
+                    renderKnowledgeBase(content);
+                    break;
+                case 'profile':
+                    headerTitle.innerText = 'Мой профиль';
+                    renderProfile(content);
+                    break;
+                case 'support':
+                    headerTitle.innerText = 'Поддержка';
+                    renderSupport(content);
+                    break;
+                case 'adminPanel':
+                    headerTitle.innerText = 'Админ панель';
+                    renderAdminPanel(content);
+                    break;
+                default:
+                    renderMainMenu(content);
+            }
+        }
+
+        // ---------- Экран: Главное меню ----------
+        function renderMainMenu(container) {
+            if (!currentUser) {
+                container.innerHTML = `
+                    <div class="text-center">
+                        <p style="margin-bottom: 20px;">Добро пожаловать! Для работы необходимо зарегистрироваться.</p>
+                        <button class="button" onclick="navigate('register')">Зарегистрироваться</button>
+                    </div>
+                `;
+                return;
+            }
+            let html = `
+                <div class="menu-grid">
+                    <div class="menu-row">
+                        <div class="menu-btn-large" onclick="navigate('restaurantOpen')">
+                            <span>🏘️</span> Открытие ресторана
+                        </div>
+                        <div class="menu-btn-large" onclick="navigate('knowledgeBase')">
+                            <span>📚</span> База знаний
+                        </div>
+                    </div>
+                    <div class="menu-row">
+                        <div class="menu-btn-large" onclick="navigate('profile')">
+                            <span>👤</span> Мой профиль
+                        </div>
+                        <div class="menu-btn-large" onclick="navigate('support')">
+                            <span>🆘</span> Поддержка
+                        </div>
+                    </div>
+                </div>
+            `;
+            // Проверка на администратора (для демо: если ФИО содержит "Админ" или ID=517383463)
+            if (currentUser.fullName.includes('Админ') || currentUser.userId === 517383463) {
+                html += `
+                    <div class="menu-row" style="margin-top: 12px;">
+                        <div class="menu-btn-large" style="background:#e7f1ff;" onclick="navigate('adminPanel')">
+                            <span>👑</span> Админ панель
+                        </div>
+                    </div>
+                `;
+            }
+            html += `<button class="button button-outline mt-4" onclick="logout()">Выйти</button>`;
+            container.innerHTML = html;
+        }
+
+        // ---------- Экран: Регистрация ----------
+        function renderRegister(container) {
+            container.innerHTML = `
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label>ФИО (Фамилия Имя Отчество)</label>
+                        <input type="text" id="fullName" placeholder="Иванов Иван Иванович" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Должность</label>
+                        <select id="position">
+                            <option value="Менеджер доставки">Менеджер доставки</option>
+                            <option value="Оператор доставки">Оператор доставки</option>
+                            <option value="Зам. директора">Зам. директора</option>
+                            <option value="Директор">Директор</option>
+                            <option value="Территориальный управляющий">Территориальный управляющий</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ресторан</label>
+                        <select id="restaurant">
+                            ${RESTAURANTS.map(r => `<option value="${r}">${r}</option>`).join('')}
+                        </select>
+                    </div>
+                    <button type="submit" class="button">Зарегистрироваться</button>
+                </form>
+            `;
+            document.getElementById('registerForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const fullName = document.getElementById('fullName').value.trim();
+                if (fullName.split(' ').length < 2) {
+                    alert('Введите минимум фамилию и имя');
+                    return;
+                }
+                const user = {
+                    userId: Date.now(), // уникальный ID
+                    fullName: fullName,
+                    position: document.getElementById('position').value,
+                    restaurant: document.getElementById('restaurant').value,
+                    registered: new Date().toLocaleString()
+                };
+                saveUser(user);
+                navigate('mainMenu');
+            });
+        }
+
+        // ---------- Экран: Открытие ресторана (подменю) ----------
+        function renderRestaurantOpen(container) {
+            container.innerHTML = `
+                <div class="menu-grid">
+                    <div class="menu-row">
+                        <div class="menu-btn-large" onclick="navigate('vehicleList')">
+                            <span>🚗</span> Проверка ТС
+                        </div>
+                        <div class="menu-btn-large" onclick="navigate('deliveryBlocks')">
+                            <span>📦</span> Проверка доставки
+                        </div>
+                    </div>
+                </div>
+                <button class="button button-outline mt-4" onclick="navigate('mainMenu')">🔙 Назад</button>
+            `;
+        }
+
+        // ---------- Экран: Список ТС ----------
+        function renderVehicleList(container) {
+            const vehicles = getVehiclesForRestaurant();
+            const checkedToday = getCheckedVehiclesToday();
+            let html = `<p>Ресторан: <strong>${currentUser.restaurant}</strong></p>`;
+            vehicles.forEach(v => {
+                const checked = checkedToday.includes(v.plate);
+                html += `
+                    <div class="list-item" onclick="selectVehicle('${v.plate}')">
+                        <div>
+                            <div class="list-item-title">${v.plate} (${v.model})</div>
+                            <div class="list-item-sub">${checked ? '✅ проверено' : '⏳ не проверено'}</div>
+                        </div>
+                        <span>➡️</span>
+                    </div>
+                `;
+            });
+            html += `<button class="button button-outline mt-4" onclick="navigate('restaurantOpen')">🔙 Назад</button>`;
+            container.innerHTML = html;
+        }
+
+        window.selectVehicle = (plate) => {
+            const vehicles = getVehiclesForRestaurant();
+            currentVehicle = vehicles.find(v => v.plate === plate);
+            // Сброс состояния для нового ТС
+            vehiclePhotos = [null, null, null, null, null, null];
+            vehicleChecklist = {};
+            for (let i = 0; i < CHECK_POINTS.length; i++) {
+                vehicleChecklist[i] = 'ok';
+            }
+            problemComments = {};
+            problemPhotos = {};
+            navigate('vehiclePhotos');
+        };
+
+        // ---------- Экран: Загрузка 6 фото ТС ----------
+        function renderVehiclePhotos(container) {
+            const photoLabels = ['Вид спереди', 'Вид справа', 'Вид сзади', 'Вид слева', 'Салон', 'Приборная панель'];
+            let html = `<p><strong>${currentVehicle.plate} (${currentVehicle.model})</strong></p>`;
+            html += `<div class="photo-grid">`;
+            for (let i = 0; i < 6; i++) {
+                html += `
+                    <div class="photo-item">
+                        <div class="photo-label">${i+1}. ${photoLabels[i]}</div>
+                        <input type="file" accept="image/*" capture="environment" id="photo${i}" onchange="handlePhoto(${i}, event)">
+                        ${vehiclePhotos[i] ? `<img src="${vehiclePhotos[i]}" class="photo-preview">` : ''}
+                    </div>
+                `;
+            }
+            html += `</div>`;
+            const allDone = vehiclePhotos.every(p => p !== null);
+            html += `<button class="button" onclick="nextAfterPhotos()" ${!allDone ? 'disabled' : ''}>✅ Далее</button>`;
+            html += `<button class="button button-outline mt-2" onclick="navigate('vehicleList')">🔙 Назад</button>`;
+            container.innerHTML = html;
+        }
+
+        window.handlePhoto = (index, event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                // Добавляем водяной знак (номер ТС + дата)
+                addWatermark(dataUrl, `${currentVehicle.plate} ${new Date().toLocaleString()}`).then(watermarked => {
+                    vehiclePhotos[index] = watermarked;
+                    renderVehiclePhotos(document.getElementById('content'));
+                });
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // Функция наложения водяного знака (через canvas)
+        async function addWatermark(src, text) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    ctx.font = 'bold 36px Arial';
+                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 2;
+                    const x = 20;
+                    const y = canvas.height - 40;
+                    ctx.strokeText(text, x, y);
+                    ctx.fillText(text, x, y);
+                    resolve(canvas.toDataURL('image/jpeg'));
+                };
+                img.src = src;
+            });
+        }
+
+        window.nextAfterPhotos = () => {
+            if (vehiclePhotos.every(p => p !== null)) {
+                navigate('vehicleChecklist');
+            } else {
+                alert('Сделайте все 6 фото');
+            }
+        };
+
+        // ---------- Экран: Чек-лист ТС ----------
+        function renderVehicleChecklist(container) {
+            let html = `<p><strong>${currentVehicle.plate}</strong></p>`;
+            for (let i = 0; i < CHECK_POINTS.length; i++) {
+                const status = vehicleChecklist[i];
+                const statusClass = status === 'ok' ? 'ok' : 'problem';
+                const statusText = status === 'ok' ? '✅' : '❌';
+                html += `
+                    <div class="checklist-item">
+                        <div class="status ${statusClass}" onclick="toggleChecklistPoint(${i})">${statusText}</div>
+                        <div class="text">${i+1}. ${CHECK_POINTS[i]}</div>
+                    </div>
+                `;
+                if (status === 'problem' && problemComments[i]) {
+                    html += `<div class="comment-box">💬 ${problemComments[i]}</div>`;
+                }
+                if (status === 'problem' && problemPhotos[i]) {
+                    html += `<img src="${problemPhotos[i]}" class="photo-preview" style="max-width:100px; margin-left:46px;">`;
+                }
+            }
+            html += `<button class="button" onclick="completeChecklist()">👌 Осмотр проведен</button>`;
+            html += `<button class="button button-outline mt-2" onclick="navigate('vehiclePhotos')">🔙 Назад</button>`;
+            container.innerHTML = html;
+        }
+
+        window.toggleChecklistPoint = (index) => {
+            vehicleChecklist[index] = vehicleChecklist[index] === 'ok' ? 'problem' : 'ok';
+            if (vehicleChecklist[index] === 'ok') {
+                delete problemComments[index];
+                delete problemPhotos[index];
+            }
+            renderVehicleChecklist(document.getElementById('content'));
+        };
+
+        window.completeChecklist = () => {
+            // Проверяем, есть ли проблемные пункты без комментариев/фото
+            const problems = Object.entries(vehicleChecklist).filter(([idx, status]) => status === 'problem');
+            if (problems.length > 0) {
+                // Переходим к первому проблемному пункту для ввода комментария
+                currentProblemIndex = parseInt(problems[0][0]);
+                navigate('vehicleProblemComment', currentProblemIndex);
+            } else {
+                // Нет проблем — сохраняем проверку
+                finishVehicleCheck();
+            }
+        };
+
+        // ---------- Экран: Комментарий к проблеме ----------
+        function renderProblemComment(container, index) {
+            container.innerHTML = `
+                <p><strong>Пункт ${index+1}: ${CHECK_POINTS[index]}</strong></p>
+                <textarea id="problemComment" placeholder="Опишите проблему..." rows="4">${problemComments[index] || ''}</textarea>
+                <button class="button" onclick="saveProblemComment(${index})">Далее</button>
+                <button class="button button-outline mt-2" onclick="navigate('vehicleChecklist')">Пропустить</button>
+            `;
+        }
+
+        window.saveProblemComment = (index) => {
+            const comment = document.getElementById('problemComment').value.trim();
+            if (comment) {
+                problemComments[index] = comment;
+                // После комментария — запрос фото проблемы
+                navigate('vehicleProblemPhoto', index);
+            } else {
+                alert('Введите комментарий');
+            }
+        };
+
+        // ---------- Экран: Фото проблемы ----------
+        function renderProblemPhoto(container, index) {
+            container.innerHTML = `
+                <p><strong>Пункт ${index+1}: ${CHECK_POINTS[index]}</strong></p>
+                <div class="photo-item">
+                    <input type="file" accept="image/*" capture="environment" id="problemPhoto" onchange="handleProblemPhoto(${index}, event)">
+                    ${problemPhotos[index] ? `<img src="${problemPhotos[index]}" class="photo-preview">` : ''}
+                </div>
+                <button class="button" onclick="nextProblem(${index})">Далее</button>
+                <button class="button button-outline mt-2" onclick="skipProblemPhoto(${index})">Пропустить фото</button>
+                <button class="button button-outline mt-2" onclick="navigate('vehicleChecklist')">Назад к чек-листу</button>
+            `;
+        }
+
+        window.handleProblemPhoto = (index, event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                addWatermark(e.target.result, `${currentVehicle.plate} проблема п.${index+1} ${new Date().toLocaleString()}`).then(watermarked => {
+                    problemPhotos[index] = watermarked;
+                    renderProblemPhoto(document.getElementById('content'), index);
+                });
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.skipProblemPhoto = (index) => {
+            problemPhotos[index] = null;
+            nextProblem(index);
+        };
+
+        window.nextProblem = (index) => {
+            // Переходим к следующему проблемному пункту
+            const problems = Object.entries(vehicleChecklist).filter(([idx, status]) => status === 'problem' && parseInt(idx) > index);
+            if (problems.length > 0) {
+                currentProblemIndex = parseInt(problems[0][0]);
+                navigate('vehicleProblemComment', currentProblemIndex);
+            } else {
+                // Все проблемы обработаны
+                finishVehicleCheck();
+            }
+        };
+
+        function finishVehicleCheck() {
+            markVehicleChecked(currentVehicle.plate);
+            alert(`ТС ${currentVehicle.plate} проверено!`);
+            if (allVehiclesChecked()) {
+                alert('Все ТС ресторана проверены сегодня! Отчёт сформирован.');
+                // Здесь можно сгенерировать отчёт
+            }
+            navigate('vehicleList');
+        }
+
+        // ---------- Экран: Список блоков доставки ----------
+        function renderDeliveryBlocks(container) {
+            const checked = getCheckedDeliveryBlocks();
+            let html = `<p>Ресторан: <strong>${currentUser.restaurant}</strong></p>`;
+            DELIVERY_BLOCKS.forEach((block, idx) => {
+                const isChecked = checked.includes(block.name);
+                html += `
+                    <div class="list-item" onclick="selectDeliveryBlock(${idx})">
+                        <div>
+                            <div class="list-item-title">${block.name}</div>
+                            <div class="list-item-sub">${block.points} пунктов ${isChecked ? '✅' : ''}</div>
+                        </div>
+                        <span>➡️</span>
+                    </div>
+                `;
+            });
+            html += `<button class="button button-outline mt-4" onclick="navigate('restaurantOpen')">🔙 Назад</button>`;
+            container.innerHTML = html;
+        }
+
+        window.selectDeliveryBlock = (idx) => {
+            currentDeliveryBlockIndex = idx;
+            currentDeliveryPoint = 0;
+            navigate('deliveryBlockDetail', idx);
+        };
+
+        // ---------- Экран: Детали блока (по пунктам) ----------
+        function renderDeliveryBlockDetail(container, idx) {
+            const block = DELIVERY_BLOCKS[idx];
+            const pointIndex = currentDeliveryPoint;
+            if (pointIndex >= block.points) {
+                // Все пункты пройдены — запрашиваем комментарий
+                navigate('deliveryComment', idx);
+                return;
+            }
+            container.innerHTML = `
+                <p><strong>${block.name}</strong></p>
+                <p>Пункт ${pointIndex+1} из ${block.points}</p>
+                <p style="margin: 20px 0;">${getDeliveryPointText(block.name, pointIndex)}</p>
+                <button class="button" onclick="nextDeliveryPoint()">✅ Далее</button>
+                <button class="button button-outline mt-2" onclick="navigate('deliveryBlocks')">🔙 Назад</button>
+            `;
+        }
+
+        // Имитация текста пунктов (можно дополнить из блока)
+        function getDeliveryPointText(blockName, pointIndex) {
+            // Здесь можно вернуть реальный текст, для демо — заглушка
+            return `Проверьте пункт ${pointIndex+1} в блоке "${blockName}"`;
+        }
+
+        window.nextDeliveryPoint = () => {
+            currentDeliveryPoint++;
+            navigate('deliveryBlockDetail', currentDeliveryBlockIndex);
+        };
+
+        // ---------- Экран: Комментарий к блоку доставки ----------
+        function renderDeliveryComment(container, idx) {
+            const block = DELIVERY_BLOCKS[idx];
+            container.innerHTML = `
+                <p><strong>${block.name}</strong></p>
+                <textarea id="deliveryComment" placeholder="Оставьте комментарий" rows="4"></textarea>
+                <button class="button" onclick="completeDeliveryBlock(${idx})">✅ Завершить блок</button>
+                <button class="button button-outline mt-2" onclick="navigate('deliveryBlocks')">🔙 Назад</button>
+            `;
+        }
+
+        window.completeDeliveryBlock = (idx) => {
+            const block = DELIVERY_BLOCKS[idx];
+            const comment = document.getElementById('deliveryComment').value.trim() || 'Без комментария';
+            markDeliveryBlockChecked(block.name);
+            alert(`Блок "${block.name}" завершён. Комментарий: ${comment}`);
+            if (allDeliveryBlocksChecked()) {
+                alert('Все блоки доставки проверены! Отчёт готов.');
+            }
+            navigate('deliveryBlocks');
+        };
+
+        // ---------- Экран: База знаний (упрощённо) ----------
+        function renderKnowledgeBase(container) {
+            container.innerHTML = `
+                <div class="form-group">
+                    <input type="text" id="searchInput" placeholder="Введите запрос...">
+                </div>
+                <button class="button" onclick="searchKnowledge()">🔍 Поиск</button>
+                <div id="searchResults" style="margin-top: 20px;"></div>
+                <button class="button button-outline mt-4" onclick="navigate('mainMenu')">🔙 Назад</button>
+            `;
+        }
+
+        window.searchKnowledge = () => {
+            const query = document.getElementById('searchInput').value.trim();
+            const resultsDiv = document.getElementById('searchResults');
+            if (!query) {
+                resultsDiv.innerHTML = '<p>Введите запрос</p>';
+                return;
+            }
+            resultsDiv.innerHTML = `
+                <div class="list-item" onclick="alert('Скачивание стандарта...')">
+                    <div>📄 Стандарт доставки (версия 2.1)</div>
+                </div>
+                <div class="list-item" onclick="alert('Скачивание инструкции...')">
+                    <div>📄 Инструкция по проверке ТС</div>
+                </div>
+            `;
+        };
+
+        // ---------- Экран: Профиль ----------
+        function renderProfile(container) {
+            container.innerHTML = `
+                <p><strong>ФИО:</strong> ${currentUser.fullName}</p>
+                <p><strong>Должность:</strong> ${currentUser.position}</p>
+                <p><strong>Ресторан:</strong> ${currentUser.restaurant}</p>
+                <p><strong>ID:</strong> ${currentUser.userId}</p>
+                <p><strong>Дата регистрации:</strong> ${currentUser.registered || 'неизвестно'}</p>
+                <button class="button button-outline mt-4" onclick="navigate('mainMenu')">🔙 Назад</button>
+            `;
+        }
+
+        // ---------- Экран: Поддержка ----------
+        function renderSupport(container) {
+            container.innerHTML = `
+                <textarea id="supportMsg" placeholder="Опишите проблему..." rows="4"></textarea>
+                <button class="button mt-2" onclick="sendSupport()">📤 Отправить</button>
+                <button class="button button-outline mt-2" onclick="navigate('mainMenu')">🔙 Назад</button>
+            `;
+        }
+
+        window.sendSupport = () => {
+            const msg = document.getElementById('supportMsg').value.trim();
+            if (msg) {
+                alert('Сообщение отправлено администратору.');
+                document.getElementById('supportMsg').value = '';
+            } else {
+                alert('Введите сообщение');
+            }
+        };
+
+        // ---------- Экран: Админ панель (упрощённо) ----------
+        function renderAdminPanel(container) {
+            container.innerHTML = `
+                <p><strong>Статистика:</strong></p>
+                <p>Всего пользователей: 1 (текущий)</p>
+                <div class="list-item" onclick="alert('Удаление пользователя (демо)')">
+                    <span>🗑️ Удалить пользователя</span>
+                </div>
+                <div class="list-item" onclick="alert('Рассылка сообщения (демо)')">
+                    <span>📢 Сделать рассылку</span>
+                </div>
+                <button class="button button-outline mt-4" onclick="navigate('mainMenu')">🔙 Назад</button>
+            `;
+        }
+
+        // ---------- Обработчики навигации ----------
+        document.getElementById('backBtn').addEventListener('click', () => {
+            // Простая навигация назад (можно улучшить)
+            if (currentScreen === 'vehiclePhotos') navigate('vehicleList');
+            else if (currentScreen === 'vehicleChecklist') navigate('vehiclePhotos');
+            else if (currentScreen === 'vehicleProblemComment' || currentScreen === 'vehicleProblemPhoto') navigate('vehicleChecklist');
+            else if (currentScreen === 'deliveryBlockDetail') navigate('deliveryBlocks');
+            else if (currentScreen === 'deliveryComment') navigate('deliveryBlocks');
+            else if (currentScreen === 'deliveryBlocks') navigate('restaurantOpen');
+            else if (currentScreen === 'restaurantOpen') navigate('mainMenu');
+            else if (currentScreen === 'knowledgeBase') navigate('mainMenu');
+            else if (currentScreen === 'profile') navigate('mainMenu');
+            else if (currentScreen === 'support') navigate('mainMenu');
+            else if (currentScreen === 'adminPanel') navigate('mainMenu');
+            else navigate('mainMenu');
+        });
+
+        document.getElementById('menuBtn').addEventListener('click', () => {
+            navigate('mainMenu');
+        });
+
+        // Старт
+        loadUser();
+        navigate('mainMenu');
+    </script>
+</body>
+</html>
