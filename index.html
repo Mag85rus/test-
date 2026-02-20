@@ -1,1124 +1,1081 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Ассистент доставки</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f0f2f5;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 8px;
-        }
-        #app {
-            max-width: 420px;
-            width: 100%;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            overflow: hidden;
-            position: relative;
-            min-height: 680px;
-            display: flex;
-            flex-direction: column;
-        }
-        .header {
-            background: #2A4B7C;
-            color: white;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .header h1 {
-            font-size: 1.3rem;
-            font-weight: 500;
-            flex: 1;
-        }
-        .back-btn, .menu-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .back-btn:hover, .menu-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        .content {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            max-height: calc(100vh - 130px);
-        }
-        .menu-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .menu-row {
-            display: flex;
-            gap: 12px;
-        }
-        .menu-row .menu-btn-large {
-            flex: 1;
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 16px;
-            padding: 20px 8px;
-            font-size: 1rem;
-            font-weight: 500;
-            color: #2A4B7C;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .menu-row .menu-btn-large:hover {
-            background: #e9ecef;
-        }
-        .menu-row .menu-btn-large span {
-            font-size: 1.8rem;
-        }
-        .list-item {
-            background: #f8f9fa;
-            border-radius: 14px;
-            padding: 14px 16px;
-            margin-bottom: 10px;
-            border: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-        .list-item-title {
-            font-weight: 500;
-            color: #212529;
-        }
-        .list-item-sub {
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin-top: 4px;
-        }
-        .badge {
-            background: #2A4B7C;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-        }
-        .badge-success {
-            background: #28a745;
-        }
-        .button {
-            background: #2A4B7C;
-            border: none;
-            color: white;
-            padding: 14px;
-            border-radius: 14px;
-            font-size: 1rem;
-            font-weight: 500;
-            width: 100%;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 12px;
-        }
-        .button-secondary {
-            background: #6c757d;
-        }
-        .button-outline {
-            background: white;
-            border: 1px solid #2A4B7C;
-            color: #2A4B7C;
-        }
-        .form-group {
-            margin-bottom: 16px;
-        }
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            color: #495057;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ced4da;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-family: inherit;
-        }
-        .checklist-item {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .checklist-item .status {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            background: #f1f3f5;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .checklist-item .text {
-            flex: 1;
-            font-size: 0.9rem;
-        }
-        .status.ok {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status.problem {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        .comment-box {
-            background: #f1f3f5;
-            border-radius: 12px;
-            padding: 12px;
-            margin-top: 8px;
-            font-size: 0.9rem;
-        }
-        .photo-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin: 16px 0;
-        }
-        .photo-item {
-            background: #f8f9fa;
-            border: 1px dashed #adb5bd;
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .photo-label {
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-        .photo-preview {
-            width: 100%;
-            max-height: 200px;
-            object-fit: contain;
-            border-radius: 8px;
-            margin-top: 8px;
-        }
-        .hidden {
-            display: none !important;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .mt-2 {
-            margin-top: 8px;
-        }
-        .mt-4 {
-            margin-top: 24px;
-        }
-        .flex-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        .watermark {
-            font-size: 0.8rem;
-            color: #6c757d;
-            margin-top: 4px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>Мчимыч — контроль внешнего вида</title>
+  <!-- Font Awesome 6 (free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: #f4f7fc;
+      color: #1e2b3c;
+      line-height: 1.5;
+    }
+
+    /* корпоративный стиль с яркими акцентами */
+    .accent-orange {
+      color: #f05b24;
+    }
+    .bg-accent {
+      background: #f05b24;
+      color: white;
+    }
+    .warning-block {
+      background: #ffefdb;
+      border-left: 5px solid #f05b24;
+      padding: 1rem;
+      border-radius: 12px;
+      margin: 1.5rem 0;
+      font-weight: 500;
+    }
+    .warning-block i {
+      color: #f05b24;
+      margin-right: 10px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* карточки и сетки */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.2rem;
+      margin: 2rem 0;
+    }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 1.5rem 1rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid #eef2f6;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 24px rgba(0,0,0,0.06);
+    }
+
+    .icon-large {
+      font-size: 2.4rem;
+      color: #f05b24;
+      margin-bottom: 0.75rem;
+    }
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin: 2rem 0 0.5rem;
+      position: relative;
+      display: inline-block;
+    }
+    h2:after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 4px;
+      background: #f05b24;
+      border-radius: 4px;
+      margin-top: 6px;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.8rem;
+    }
+
+    /* шаги / навигация */
+    .step-marker {
+      display: inline-block;
+      background: #1e2b3c;
+      color: white;
+      border-radius: 40px;
+      padding: 0.2rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .bullet-list {
+      list-style: none;
+    }
+    .bullet-list li {
+      margin: 0.8rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .bullet-list li i {
+      color: #f05b24;
+      font-size: 1.2rem;
+      min-width: 24px;
+      margin-top: 3px;
+    }
+
+    /* фото-заглушки (имитация изображений) */
+    .photo-mock {
+      background: #d9e2ef;
+      border-radius: 20px;
+      padding: 2rem 1rem;
+      text-align: center;
+      color: #2c3e50;
+      font-weight: 500;
+      border: 2px dashed #a0b8cc;
+      margin: 1rem 0;
+    }
+    .photo-mock i {
+      font-size: 2.5rem;
+      color: #4a6782;
+      margin-bottom: 0.5rem;
+    }
+    .photo-caption {
+      font-size: 0.9rem;
+      color: #4f6f8f;
+      margin-top: 8px;
+    }
+
+    /* квиз-блоки — исправлено отображение radio/checkbox */
+    .quiz-block {
+      background: white;
+      border-radius: 28px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .quiz-question {
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      background: #f2f5f9;
+      border-radius: 40px;
+      padding: 0.8rem 1.2rem;
+      margin: 0.7rem 0;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: 0.2s;
+    }
+    .quiz-option:hover {
+      background: #e6ecf5;
+    }
+    /* стандартные контролы видны */
+    .quiz-option input {
+      margin-right: 12px;
+      width: 1.2rem;
+      height: 1.2rem;
+      cursor: pointer;
+      accent-color: #f05b24;
+      flex-shrink: 0;
+    }
+    .quiz-option input[type=checkbox] {
+      border-radius: 4px;
+    }
+    .quiz-option input[type=radio] {
+      border-radius: 50%;
+    }
+    .quiz-feedback {
+      margin-top: 1.2rem;
+      padding: 1rem;
+      border-radius: 16px;
+      display: none;
+    }
+    .quiz-feedback.correct {
+      background: #e1f7e9;
+      color: #1e6f3f;
+      display: block;
+    }
+    .quiz-feedback.incorrect {
+      background: #ffe2e2;
+      color: #b33a3a;
+      display: block;
+    }
+    .btn {
+      background: #1e2b3c;
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-top: 0.5rem;
+    }
+    .btn:hover {
+      background: #f05b24;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid #1e2b3c;
+      color: #1e2b3c;
+    }
+
+    /* кейс-карточки (интерактив) */
+    .case-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .case-item {
+      background: white;
+      border-radius: 30px;
+      padding: 1.2rem;
+      flex: 1 1 200px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+      border: 1px solid #e2eaf2;
+      transition: 0.2s;
+    }
+    .case-item .case-title {
+      font-weight: 700;
+      color: #1e2b3c;
+      margin-bottom: 0.5rem;
+    }
+    .case-item .case-content {
+      display: none;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #dbe4ed;
+    }
+    .case-item.active .case-content {
+      display: block;
+    }
+    .case-item .case-btn {
+      background: none;
+      border: none;
+      color: #f05b24;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    /* финальный тест */
+    #final-test .quiz-option {
+      background: white;
+      border: 1px solid #cbd6e4;
+    }
+    .test-result {
+      background: #1e2b3c;
+      color: white;
+      border-radius: 40px;
+      padding: 1.2rem;
+      text-align: center;
+      font-size: 1.4rem;
+      margin: 1.5rem 0;
+    }
+
+    /* адаптация */
+    @media (max-width: 600px) {
+      h2 { font-size: 1.8rem; }
+      .container { padding: 0.75rem; }
+    }
+
+    /* плашка таймер/цифры */
+    .digit-block {
+      background: linear-gradient(145deg, #1e2b3c, #15222e);
+      color: white;
+      border-radius: 48px;
+      padding: 1rem 2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      margin: 1rem 0;
+    }
+    .digit-block i {
+      font-size: 2rem;
+      color: #f05b24;
+    }
+
+    /* важные запреты */
+    .important-note {
+      background: #f05b24;
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 700;
+      display: inline-block;
+      font-size: 0.9rem;
+      letter-spacing: 0.3px;
+    }
+
+    hr {
+      border: none;
+      border-top: 2px solid #dae2ec;
+      margin: 2rem 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #6a7e9c;
+    }
+
+    /* языковой переключатель */
+    .lang-selector {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 10px 0;
+    }
+    .lang-btn {
+      background: transparent;
+      border: 1px solid #cbd6e4;
+      border-radius: 40px;
+      padding: 6px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      color: #1e2b3c;
+    }
+    .lang-btn:hover {
+      background: #e6ecf5;
+    }
+    .lang-btn.active {
+      background: #1e2b3c;
+      color: white;
+      border-color: #1e2b3c;
+    }
+  </style>
 </head>
 <body>
-    <div id="app">
-        <div class="header">
-            <button class="back-btn" id="backBtn" style="visibility: hidden;">←</button>
-            <h1 id="headerTitle">Ассистент доставки</h1>
-            <button class="menu-btn" id="menuBtn">☰</button>
-        </div>
-        <div class="content" id="content"></div>
+  <div class="container">
+    <!-- языковой переключатель -->
+    <div class="lang-selector">
+      <button class="lang-btn active" data-lang="ru">Русский</button>
+      <button class="lang-btn" data-lang="ky">Кыргызча</button>
+      <button class="lang-btn" data-lang="tg">Тоҷикӣ</button>
+      <button class="lang-btn" data-lang="uz">O'zbek</button>
     </div>
 
-    <script>
-        // ---------- Константы из бота ----------
-        const RESTAURANTS = [
-            "Т.00 Тестовый", "Т.02 Пятницкая", "Т.03 Щёлковская", "Т.04 НОП (Народного ополчения)",
-            "Т.05 Пр.Мира", "Т.06 Варшавка Тануки", "Т.07 Варшавка Ерш", "Т.08 Щербаковская",
-            "Т.09 Симоновский вал", "Т.10 Алтуфьево", "Т.11 Генерала Белова", "Т.13 Воронеж",
-            "Т.15 Шоссе Энтузиастов", "Т.16 Волгоградка 1 (д.17)", "Т.17 Перерва Тануки",
-            "Т.18 Перерва Ерш", "Т.21 Каширское шоссе", "Т.22 Самара", "Т.24 Балаклавка Тануки",
-            "Т.28 Боровка Тануки", "Т.29 Боровка Ерш", "Т.30 Шокальского", "Т.33 Можайское шоссе",
-            "Т.34 Шаболовка", "Т.35 Коштоянца", "Т.36 Привольная (Жулебино)", "Т.37 Митино",
-            "Т.40 Свобода", "Т.41 Мытищи", "Т.42 Коньково (Профсоюзная)", "Т.44 Люберцы",
-            "Т.45 Преображенка", "Т.46 Паустовского (Ясенево)", "Т.47 3‑я Владимирская (Перово)",
-            "Т.48 Новокосино", "Т.49 Петрозаводская", "Т.50 Дмитровка 1 (д.64)", "Т.52 Сущевка",
-            "Т.53 Волгоградка 2 (д.98)", "Т.55 Липецкая Тануки", "Т.56 Екатеринбург 2",
-            "Т.57 Липецкая Ерш", "Т.58 Мосфильм", "Т.59 Химки", "Т.60 Б.Академическая",
-            "Т.61 Зеленоград", "Т.62 Космонавтов Ерш", "Т.63 Космонавтов Тануки", "Т.65 Краснодар",
-            "Т.66 Пришвина Тануки", "Т.67 Пришвина Ерш", "Т.69 Бутово", "Т.71 Дмитровка 2 (д.108Б)",
-            "Т.72 Нахимовский пр‑т", "Т.73 Н.Новгород", "Т.74 Уфа", "Т.75 Реутов",
-            "Т.76 Борисовские пруды", "Т.77 Красногорск", "Т.78 Рязанский пр‑т", "Т.79 Одинцово",
-            "Т.80 Подольск", "Т.81 Куркино", "Т.82 Кунцево", "Т.83 Б.Златоустинский (Лубянка)",
-            "Т.85 Ярославка", "Т.86 Алматы Достык", "Т.87 Осенний бульвар", "Т.88 Чертановская",
-            "Т.89 Долгопрудный", "Т.90 Королёв", "Т.91 Цветной бульвар", "Т.92 Балашиха",
-            "Т.93 Казань", "Т.94 Краснодар 2", "Т.95 Метрополис", "Т.96 Красная Пресня",
-            "Т.97 Москва‑Сити", "Т.100 Земляной вал", "Т.101 Б.Якиманка", "Т.102 Строгино",
-            "Т.103 Алматы Розыбакиева", "Т.104 Астана Мангилик Ел", "Т.105 Казань Каспийка",
-            "Т.107 Богданова Каспийка", "Т.108 Богданова (Солнцево)", "Т.109 Ташкент Тараса Шевченко",
-            "Т.110 Алматы Шевченко", "Т.114 Ташкент сити молл", "Т.115 Домодедово",
-            "Т.117 Алматы Сатпаева", "Т.118 Алматы Сейфулина", "Т.119 Астана Туран",
-            "Т.123 Щелково", "Т.124 Солнечногорск", "К.105 Казань Каспийка", "К.107 Богданова Каспийка",
-            "К.116 Ташкент сити молл", "К.121 Ташкент Тараса Шевченко", "В.120 Алматы Сейфулина",
-            "В.122 Астана"
-        ];
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <section style="text-align: center; padding: 2rem 0 1rem;">
+      <i class="fas fa-motorcycle" style="font-size: 4rem; color: #f05b24;"></i>
+      <h1 data-i18n="appTitle" style="font-size: 2.6rem; font-weight: 700; margin: 0.5rem 0;">Мчимыч</h1>
+      <p data-i18n="appSubtitle" style="font-size: 1.3rem; color: #3f556b;">Контроль внешнего вида курьера и ТС</p>
+      <div class="digit-block" style="margin: 2rem auto;">
+        <i class="fas fa-clock"></i>
+        <span data-i18n="timerLabel">3 минуты — и ты в курсе всех правил</span>
+      </div>
+      <div style="margin: 2rem 0;">
+        <a href="#start" class="btn" style="font-size: 1.1rem;" data-i18n="startButton">🚀 Начать обучение</a>
+      </div>
+      <div class="photo-mock" style="max-width: 500px; margin: 1rem auto;">
+        <i class="fas fa-camera"></i>
+        <p data-i18n="mockInterface">Пример интерфейса: селфи, фото сумки, ТС</p>
+      </div>
+    </section>
 
-        // Транспортные средства из vehicles.xlsx
-        const VEHICLES_DATA = [
-            { model: "Renault Sandero", plate: "А463УА799", restaurant: "Т.17 Перерва Тануки" },
-            { model: "Renault Sandero", plate: "Е332ОА799", restaurant: "Т.17 Перерва Тануки" },
-            { model: "Renault Sandero", plate: "К631МТ799", restaurant: "Т.17 Перерва Тануки" },
-            { model: "Renault Sandero", plate: "К640МТ799", restaurant: "Т.17 Перерва Тануки" },
-            { model: "Renault Sandero", plate: "О304ОК799", restaurant: "Т.17 Перерва Тануки" },
-            { model: "Renault Sandero", plate: "О311ОК799", restaurant: "Т.17 Перерва Тануки" },
-            { model: "Renault Sandero", plate: "Т483ТС799", restaurant: "Т.17 Перерва Тануки" },
-            { model: "Электровелосипед", plate: "АА031О", restaurant: "Т.37 Митино" },
-            { model: "Электровелосипед", plate: "АА032О", restaurant: "Т.37 Митино" },
-            { model: "Электровелосипед", plate: "АА077О", restaurant: "Т.37 Митино" },
-            { model: "Электровелосипед", plate: "АА088О", restaurant: "Т.37 Митино" },
-            { model: "Renault Sandero", plate: "К534МТ799", restaurant: "Т.37 Митино" },
-            { model: "Renault Sandero", plate: "Н202УТ799", restaurant: "Т.37 Митино" },
-            { model: "Renault Sandero", plate: "Н839КТ799", restaurant: "Т.37 Митино" },
-            { model: "Ravon R2", plate: "О615АТ799", restaurant: "Т.37 Митино" },
-            { model: "Lada Granta", plate: "Р236КР977", restaurant: "Т.37 Митино" },
-            { model: "Lada Granta", plate: "Р334КТ977", restaurant: "Т.37 Митино" },
-            { model: "Lada Granta", plate: "Р340КР977", restaurant: "Т.37 Митино" },
-            { model: "Lada Granta", plate: "Т304КМ977", restaurant: "Т.37 Митино" },
-            { model: "Lada Granta", plate: "Т346КМ977", restaurant: "Т.37 Митино" },
-            { model: "Lada Granta", plate: "Т382КМ977", restaurant: "Т.37 Митино" },
-            { model: "Ravon R2", plate: "Т889УР777", restaurant: "Т.37 Митино" },
-            { model: "Ravon R2", plate: "У743УК777", restaurant: "Т.37 Митино" },
-            { model: "Скутер", plate: "нет номера", restaurant: "Т.37 Митино" },
-            { model: "Велосипед", plate: "нет номера", restaurant: "Т.81 Куркино" },
-            { model: "Renault Sandero", plate: "К211ТМ799", restaurant: "Т.81 Куркино" },
-            { model: "Renault Sandero", plate: "К450ТМ799", restaurant: "Т.81 Куркино" },
-            { model: "Ravon R2", plate: "Н876УК777", restaurant: "Т.81 Куркино" },
-            { model: "Lada Granta", plate: "Р338КР977", restaurant: "Т.81 Куркино" },
-            { model: "Renault Sandero", plate: "Р368НТ799", restaurant: "Т.81 Куркино" },
-            { model: "Renault Sandero", plate: "Р398НТ799", restaurant: "Т.81 Куркино" },
-            { model: "Renault Sandero", plate: "Т662ТА799", restaurant: "Т.81 Куркино" },
-            { model: "Ravon R2", plate: "Т945УР777", restaurant: "Т.81 Куркино" },
-            { model: "Электровелосипед", plate: "нет номера", restaurant: "Т.81 Куркино" },
-            { model: "Renault Sandero", plate: "А434УА799", restaurant: "Т.61 Зеленоград" },
-            { model: "Renault Sandero", plate: "К628МТ799", restaurant: "Т.61 Зеленоград" },
-            { model: "Renault Sandero", plate: "К687МХ799", restaurant: "Т.61 Зеленоград" },
-            { model: "Renault Sandero", plate: "К908РО799", restaurant: "Т.61 Зеленоград" },
-            { model: "Ravon R2", plate: "Н883УК777", restaurant: "Т.61 Зеленоград" },
-            { model: "Ravon R2", plate: "О818АТ799", restaurant: "Т.61 Зеленоград" },
-            { model: "Renault Sandero", plate: "Т923СА799", restaurant: "Т.61 Зеленоград" },
-            { model: "Велосипед", plate: "нет номера", restaurant: "Т.61 Зеленоград" },
-            { model: "Велосипед", plate: "нет номера", restaurant: "Т.61 Зеленоград" },
-            { model: "Велосипед", plate: "нет номера", restaurant: "Т.61 Зеленоград" },
-            { model: "Lada Granta", plate: "Е837КТ977", restaurant: "Т.40 Свобода" },
-            { model: "Renault Sandero", plate: "К669МХ799", restaurant: "Т.40 Свобода" },
-            { model: "Lada Granta", plate: "М232КТ977", restaurant: "Т.40 Свобода" },
-            { model: "Renault Sandero", plate: "Н812КТ799", restaurant: "Т.40 Свобода" },
-            { model: "Lada Granta", plate: "Т196КМ977", restaurant: "Т.40 Свобода" },
-            { model: "Renault Sandero", plate: "Е414МЕ799", restaurant: "Т.59 Химки" },
-            { model: "Renault Sandero", plate: "К580МХ799", restaurant: "Т.59 Химки" },
-            { model: "Renault Sandero", plate: "О297ОК799", restaurant: "Т.59 Химки" },
-            { model: "Lada Granta", plate: "Р093КР977", restaurant: "Т.59 Химки" },
-            { model: "Lada Granta", plate: "Р314КР977", restaurant: "Т.59 Химки" },
-            { model: "Lada Granta", plate: "Р353КР977", restaurant: "Т.59 Химки" },
-            { model: "Renault Sandero", plate: "Р384НТ799", restaurant: "Т.59 Химки" },
-            { model: "Renault Sandero", plate: "Р397НТ799", restaurant: "Т.59 Химки" },
-            { model: "Ravon R2", plate: "Р668СТ777", restaurant: "Т.59 Химки" },
-            { model: "Renault Sandero", plate: "Т426ТС799", restaurant: "Т.59 Химки" },
-            { model: "Электровелосипед", plate: "ААО830", restaurant: "Т.77 Красногорск" },
-            { model: "Renault Sandero", plate: "К925РО799", restaurant: "Т.77 Красногорск" },
-            { model: "Renault Sandero", plate: "Н317УТ799", restaurant: "Т.77 Красногорск" },
-            { model: "Ravon R2", plate: "Р782НЕ797", restaurant: "Т.77 Красногорск" },
-            { model: "Ravon R2", plate: "Р978ВА799", restaurant: "Т.77 Красногорск" },
-            { model: "Lada Granta", plate: "Т385КМ977", restaurant: "Т.77 Красногорск" },
-            { model: "Lada Granta", plate: "Т393КМ977", restaurant: "Т.77 Красногорск" },
-            { model: "Renault Sandero", plate: "Т625ТА799", restaurant: "Т.77 Красногорск" },
-            { model: "Renault Sandero", plate: "Т944ТА799", restaurant: "Т.77 Красногорск" },
-            { model: "Renault Sandero", plate: "Т946ТА799", restaurant: "Т.77 Красногорск" },
-            { model: "Электровелосипед", plate: "ААО330", restaurant: "Т.74 Уфа" },
-            { model: "Электровелосипед", plate: "ААО340", restaurant: "Т.74 Уфа" },
-            { model: "Электровелосипед", plate: "ААО350", restaurant: "Т.74 Уфа" },
-            { model: "Электровелосипед", plate: "ААО360", restaurant: "Т.00 Тестовый" },
-            { model: "Renault Sandero", plate: "М788КК799", restaurant: "Т.102 Строгино" },
-            { model: "Renault Sandero", plate: "М811КК799", restaurant: "Т.102 Строгино" },
-            { model: "Lada Granta", plate: "Р166КР977", restaurant: "Т.102 Строгино" },
-            { model: "Lada Granta", plate: "Р303КР977", restaurant: "Т.102 Строгино" },
-            { model: "Электровелосипед", plate: "ААО760", restaurant: "Т.95 Метрополис" },
-            { model: "Электровелосипед", plate: "ААО820", restaurant: "Т.95 Метрополис" },
-            { model: "Renault Sandero", plate: "К043ТМ799", restaurant: "Т.95 Метрополис" },
-            { model: "Renault Sandero", plate: "К409ТМ799", restaurant: "Т.95 Метрополис" },
-            { model: "Lada Granta", plate: "Р227КР977", restaurant: "Т.95 Метрополис" },
-            { model: "Lada Granta", plate: "Р300КР977", restaurant: "Т.95 Метрополис" },
-            { model: "Электровелосипед", plate: "ААО 410", restaurant: "Т.85 Ярославка" },
-            { model: "Электровелосипед", plate: "ААО 420", restaurant: "Т.85 Ярославка" },
-            { model: "Lada Granta", plate: "Р237КР977", restaurant: "Т.85 Ярославка" },
-            { model: "Lada Granta", plate: "Р308КР977", restaurant: "Т.85 Ярославка" },
-            { model: "Ravon R2", plate: "Р565ВА799", restaurant: "Т.85 Ярославка" },
-            { model: "Ravon R2", plate: "Р579ВА799", restaurant: "Т.85 Ярославка" },
-            { model: "Lada Granta", plate: "нет номера", restaurant: "Т.124 Солнечногорск" },
-            { model: "Lada Granta", plate: "нет номера", restaurant: "Т.124 Солнечногорск" }
-        ];
+    <!-- ТИПЫ КУРЬЕРОВ (интерактивные карточки) -->
+    <section id="start">
+      <h2 data-i18n="courierTypeTitle">Тип курьера</h2>
+      <p data-i18n="courierTypeDesc" style="color: #2d425b;">От твоего типа зависит набор фото и шаги</p>
+      <div class="card-grid">
+        <div class="card" onclick="selectType('pedestrian')" id="type-pedestrian">
+          <i class="fas fa-walking icon-large"></i>
+          <h3 data-i18n="typePedestrian">Пеший</h3>
+          <p><span data-i18n="photoLabel">📸 Фото:</span> <strong data-i18n="photoPedestrian">себя + сумка</strong></p>
+          <span class="step-marker" data-i18n="noVehicle">без ТС</span>
+        </div>
+        <div class="card" onclick="selectType('bike')" id="type-bike">
+          <i class="fas fa-bicycle icon-large"></i>
+          <h3 data-i18n="typeBike">Велосамокат</h3>
+          <p><span data-i18n="photoLabel">📸 Фото:</span> <strong data-i18n="photoBike">себя, сумка, самокат/велосипед</strong></p>
+        </div>
+        <div class="card" onclick="selectType('driver')" id="type-driver">
+          <i class="fas fa-truck icon-large"></i>
+          <h3 data-i18n="typeDriver">Водитель доставки</h3>
+          <p><span data-i18n="photoLabel">📸 Фото:</span> <strong data-i18n="photoDriver">себя, сумка, авто с 4 сторон</strong></p>
+        </div>
+        <div class="card" onclick="selectType('personal')" id="type-personal">
+          <i class="fas fa-car icon-large"></i>
+          <h3 data-i18n="typePersonal">Личный авто</h3>
+          <p><span data-i18n="photoLabel">📸 Фото:</span> <strong data-i18n="photoPersonal">себя + сумка</strong></p>
+          <span class="step-marker" data-i18n="personalVehicle">личное ТС</span>
+        </div>
+      </div>
+      <!-- подсказка после выбора типа -->
+      <div id="type-hint" class="warning-block" style="display: none;">
+        <i class="fas fa-info-circle"></i> <span id="type-hint-text"></span>
+      </div>
+    </section>
 
-        // Пункты проверки ТС (17)
-        const CHECK_POINTS = [
-            "Состояние пленки/лакокрасочного покрытия",
-            "Состояние брендированных наклеек",
-            "Состояние шин и их износа (шины установлены согласно сезонности)",
-            "Состояние колесных дисков",
-            "Состояние осветительных приборов (габаритные огни, ближний/дальний свет, указатели поворота, стоп сигналы, сигналы аварийной остановки)",
-            "Состояние стекла и зеркал",
-            "Чистота кузова",
-            "Чистота салона",
-            "Термосумка отсутствует",
-            "Чистота багажника",
-            "Наличие набора автомобилиста (аптечка с установленным сроком годности, огнетушитель с установленным датчиком давления, знак аварийной остановки)",
-            "Состояние запасного колеса",
-            "Наличие домкрата",
-            "Уровень масла в двигателе",
-            "Уровень охлаждающей жидкости",
-            "Уровень тормозной жидкости",
-            "Двигатель запускается с первого раза, отсутствуют звуки неисправности"
-        ];
+    <!-- ШАГ 1 – АЛКОТЕСТЕР И ДОКУМЕНТЫ -->
+    <section>
+      <h2 data-i18n="step1Title">Шаг 1. Алкотестер и документы</h2>
+      <div class="bullet-list">
+        <li><i class="fas fa-check-circle"></i> <span data-i18n="step1Item1">Встреться с менеджером доставки (МД)</span></li>
+        <li><i class="fas fa-check-circle"></i> <span data-i18n="step1Item2">Алкотестер — для всех</span></li>
+        <li><i class="fas fa-check-circle"></i> <span data-i18n="step1Item3">Путевой лист и акт приёма‑передачи (если есть ТС)</span></li>
+        <li><i class="fas fa-check-circle"></i> <span data-i18n="step1Item4">Поставь галочку в приложении → шаг помечен «Пройден». Снять нельзя!</span></li>
+      </div>
+      <div class="important-note"><i class="fas fa-exclamation-triangle"></i> <span data-i18n="step1Warning">Без этого шага нельзя получить заказы</span></div>
+      
+      <!-- Квиз после шага 1 (чекбоксы видны) -->
+      <div class="quiz-block" id="quiz1">
+        <div class="quiz-question" data-i18n="quiz1q">❓ Что обязательно нужно сделать на шаге 1? (выбери ВСЕ подходящие)</div>
+        <label class="quiz-option"><input type="checkbox" name="q1" value="alco"> <span data-i18n="quiz1opt1">Пройти алкотестер</span></label>
+        <label class="quiz-option"><input type="checkbox" name="q1" value="docs"> <span data-i18n="quiz1opt2">Подписать путевой лист / акт (если нужно)</span></label>
+        <label class="quiz-option"><input type="checkbox" name="q1" value="bag"> <span data-i18n="quiz1opt3">Выбрать сумку</span></label>
+        <label class="quiz-option"><input type="checkbox" name="q1" value="photo"> <span data-i18n="quiz1opt4">Сделать селфи</span></label>
+        <button class="btn" onclick="checkQuiz1()" data-i18n="checkButton">Проверить</button>
+        <div id="quiz1-feedback" class="quiz-feedback"></div>
+      </div>
+    </section>
 
-        // Блоки доставки (11)
-        const DELIVERY_BLOCKS = [
-            { name: "Санитарно-техническое состояние помещения, освещение", points: 6 },
-            { name: "Упаковка", points: 3 },
-            { name: "Термосумки", points: 4 },
-            { name: "Условия хранения соусов/топпингов, маркировка", points: 3 },
-            { name: "Техническое оборудование", points: 4 },
-            { name: "Блюда/Напитки", points: 3 },
-            { name: "Сотрудники", points: 5 },
-            { name: "Курьеры", points: 2 },
-            { name: "Документы ТС", points: 1 },
-            { name: "ITSM, Яндекс заправки, 1С авто", points: 3 },
-            { name: "Стоп-лист, стандарты", points: 2 }
-        ];
+    <!-- ШАГ 2 – ВЫБОР СУМКИ -->
+    <section>
+      <h2 data-i18n="step2Title">Шаг 2. Выбор сумки</h2>
+      <p><span data-i18n="step2Desc1">Нажми</span> <strong>«<span data-i18n="selectBagButton">Выбрать сумку</span>»</strong> <span data-i18n="step2Desc2">в приложении. Откроется список доступных сумок ресторана.</span></p>
+      <div class="warning-block">
+        <i class="fas fa-exclamation-circle"></i> <strong data-i18n="step2Warning1">ЗАПРЕЩЕНО</strong> <span data-i18n="step2Warning2">выбирать случайную сумку! Номер на фото позже сверят с выбранным.</span>
+      </div>
+      <p>✅ <span data-i18n="step2AfterSelect">После выбора нажми «Сохранить».</span></p>
+      <div class="photo-mock">
+        <i class="fas fa-shopping-bag"></i> <span data-i18n="bagListExample">Пример списка сумок: №142, №187, №203</span>
+      </div>
 
-        // ---------- Глобальное состояние приложения ----------
-        let currentUser = null;                // объект пользователя
-        let currentScreen = 'mainMenu';        // текущий экран
-        let currentVehicle = null;             // выбранное ТС для проверки
-        let vehiclePhotos = [null, null, null, null, null, null]; // 6 фото (dataURL)
-        let vehicleChecklist = {};              // { index: 'ok'/'problem' }
-        let problemComments = {};                // { index: 'текст' }
-        let problemPhotos = {};                  // { index: dataURL }
-        let currentProblemIndex = null;          // для последовательного ввода
-        let deliveryBlocksDone = [];              // названия блоков, завершённых в текущей сессии
-        let currentDeliveryBlockIndex = null;     // индекс выбранного блока
-        let currentDeliveryPoint = 0;              // текущий пункт в блоке
+      <!-- интерактив "Найди ошибку" (radio видны) -->
+      <div class="quiz-block">
+        <div class="quiz-question" data-i18n="quiz2q">🧐 Ситуация: Иван выбрал в приложении сумку №5, но по факту взял сумку №3. Правильно?</div>
+        <label class="quiz-option"><input type="radio" name="bagMistake" value="yes"> <span data-i18n="quiz2opt1">Да, главное чтобы сумка была</span></label>
+        <label class="quiz-option"><input type="radio" name="bagMistake" value="no"> <span data-i18n="quiz2opt2">Нет, номер должен совпадать</span></label>
+        <button class="btn" onclick="checkBagMistake()" data-i18n="answerButton">Ответить</button>
+        <div id="bag-feedback" class="quiz-feedback"></div>
+      </div>
+    </section>
 
-        // ---------- Инициализация ----------
-        function loadUser() {
-            const user = localStorage.getItem('currentUser');
-            if (user) {
-                currentUser = JSON.parse(user);
-            } else {
-                currentUser = null;
-            }
+    <!-- ШАГ 3 – ФОТОКОНТРОЛЬ (общая часть + типы) -->
+    <section>
+      <h2 data-i18n="step3Title">Шаг 3. Фотоконтроль</h2>
+      <p><i class="fas fa-camera"></i> <span data-i18n="step3Desc1">Все фото делаются только через приложение «Мчимыч» (не из галереи). Каждое фото содержит гео, дату и время.</span></p>
+      
+      <!-- карточки с примерами фото (визуализация) -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap:1rem; margin:1.5rem 0;">
+        <div class="photo-mock"><i class="fas fa-user"></i> <span data-i18n="photoSelfie">Селфи</span></div>
+        <div class="photo-mock"><i class="fas fa-arrows-alt"></i> <span data-i18n="photoFullBody">В полный рост</span></div>
+        <div class="photo-mock"><i class="fas fa-tag"></i> <span data-i18n="photoBag">Сумка (номер)</span></div>
+        <div class="photo-mock"><i class="fas fa-motorcycle"></i> <span data-i18n="photoScooter">Номер велосамоката</span></div>
+        <div class="photo-mock"><i class="fas fa-car-side"></i> <span data-i18n="photoCar">Авто (4 стороны)</span></div>
+      </div>
+
+      <h3 data-i18n="forEachType">Для каждого типа:</h3>
+      <ul class="bullet-list">
+        <li><i class="fas fa-dot-circle"></i> <strong data-i18n="typePedestrian">Пеший:</strong> <span data-i18n="photoPedestrianList">селфи + рост + сумка</span></li>
+        <li><i class="fas fa-dot-circle"></i> <strong data-i18n="typeBike">Велосамокат:</strong> <span data-i18n="photoBikeList">селфи + рост + сумка + номер самоката/велосипеда</span></li>
+        <li><i class="fas fa-dot-circle"></i> <strong data-i18n="typeDriver">Водитель доставки:</strong> <span data-i18n="photoDriverList">селфи + рост + сумка + автомобиль (4 стороны, должен быть виден номер)</span></li>
+        <li><i class="fas fa-dot-circle"></i> <strong data-i18n="typePersonal">Водитель на личном авто:</strong> <span data-i18n="photoPersonalList">селфи + рост + сумка</span></li>
+      </ul>
+      <p>❗️ <span data-i18n="photoFullBodyTip">Фото в полный рост лучше попросить сделать коллегу или использовать зеркало.</span></p>
+
+      <!-- Квиз: угадай набор для типа (radio видны) -->
+      <div class="quiz-block">
+        <div class="quiz-question" data-i18n="quiz3q">📌 Какой набор фото у велосамоката?</div>
+        <label class="quiz-option"><input type="radio" name="photoSet" value="wrong1"> <span data-i18n="quiz3opt1">селфи + сумка</span></label>
+        <label class="quiz-option"><input type="radio" name="photoSet" value="wrong2"> <span data-i18n="quiz3opt2">селфи + рост + сумка</span></label>
+        <label class="quiz-option"><input type="radio" name="photoSet" value="correct"> <span data-i18n="quiz3opt3">селфи + рост + сумка + номер самоката</span></label>
+        <button class="btn" onclick="checkPhotoSet()" data-i18n="checkButton">Проверить</button>
+        <div id="photoset-feedback" class="quiz-feedback"></div>
+      </div>
+    </section>
+
+    <!-- СОХРАНЕНИЕ И ОТПРАВКА -->
+    <section>
+      <h2 data-i18n="saveSendTitle">Сохранение и отправка</h2>
+      <p><span data-i18n="saveSendDesc1">После съёмки можно нажать на ✏️ (ручку) на неудачном фото и переделать. Если всё ок — «Сохранить».</span></p>
+      <div class="important-note">⚠️ <span data-i18n="photoMetadata">Фото с метаданными — нельзя подтянуть старые</span></div>
+      <p><span data-i18n="saveSendDesc2">Далее кнопка «Отправить на проверку». Ждём подтверждения.</span></p>
+
+      <div class="card-grid" style="grid-template-columns:repeat(2,1fr);">
+        <div class="card"><i class="fas fa-check-circle" style="color:#2ecc71;"></i> <span data-i18n="successCard">Успех: «Перейти к заказам»</span></div>
+        <div class="card"><i class="fas fa-exclamation-triangle" style="color:#f05b24;"></i> <span data-i18n="errorCard">Ошибка: написать в Support</span></div>
+      </div>
+
+      <!-- Кейс с плохим интернетом -->
+      <div class="warning-block">
+        <i class="fas fa-wifi-slash"></i> <span data-i18n="noInternet">При плохом соединении фото не сохранятся. Дождись связи или обратись в поддержку.</span>
+      </div>
+
+      <!-- интерактивный кейс (раскрывашка) -->
+      <div class="case-grid">
+        <div class="case-item" id="case1">
+          <div class="case-title" data-i18n="case1Title">🚶 Пеший курьер — мои фото</div>
+          <button class="case-btn" onclick="toggleCase(1)" data-i18n="showAnswer">показать ответ</button>
+          <div class="case-content" data-i18n="case1Content">Селфи + в полный рост + фото сумки с номером.</div>
+        </div>
+        <div class="case-item" id="case2">
+          <div class="case-title" data-i18n="case2Title">🚗 Водитель забыл выбрать ТС</div>
+          <button class="case-btn" onclick="toggleCase(2)" data-i18n="whatToDo">что делать?</button>
+          <div class="case-content" data-i18n="case2Content">Вернуться к шагу 1? Нет, надо выбрать авто в списке ТС перед фото (кнопка «Выберете авто/велосамокат»).</div>
+        </div>
+        <div class="case-item" id="case3">
+          <div class="case-title" data-i18n="case3Title">📶 Фото не грузятся</div>
+          <button class="case-btn" onclick="toggleCase(3)" data-i18n="solution">решение</button>
+          <div class="case-content" data-i18n="case3Content">Проверить интернет, перезапустить приложение. Если не помогает — запрос в Support.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ФИНАЛЬНЫЙ ТЕСТ -->
+    <section style="margin: 3rem 0;">
+      <h2 data-i18n="finalTestTitle">✍️ Финальный тест</h2>
+      <div id="final-test">
+        <div class="quiz-block">
+          <p class="quiz-question" data-i18n="finalQ1">1. Сколько сторон автомобиля должен снять водитель доставки?</p>
+          <label class="quiz-option"><input type="radio" name="f1" value="0"> <span data-i18n="finalQ1opt1">Одну (перед)</span></label>
+          <label class="quiz-option"><input type="radio" name="f1" value="1"> <span data-i18n="finalQ1opt2">Две</span></label>
+          <label class="quiz-option"><input type="radio" name="f1" value="2"> <span data-i18n="finalQ1opt3">Четыре</span></label>
+        </div>
+        <div class="quiz-block">
+          <p class="quiz-question" data-i18n="finalQ2">2. Можно ли загрузить фото из галереи телефона?</p>
+          <label class="quiz-option"><input type="radio" name="f2" value="yes"> <span data-i18n="finalQ2opt1">Да</span></label>
+          <label class="quiz-option"><input type="radio" name="f2" value="no"> <span data-i18n="finalQ2opt2">Нет, только через камеру приложения</span></label>
+        </div>
+        <div class="quiz-block">
+          <p class="quiz-question" data-i18n="finalQ3">3. Что делать, если после отправки фото ошибка?</p>
+          <label class="quiz-option"><input type="radio" name="f3" value="ignore"> <span data-i18n="finalQ3opt1">Игнорировать, заказы придут</span></label>
+          <label class="quiz-option"><input type="radio" name="f3" value="support"> <span data-i18n="finalQ3opt2">Написать в Support</span></label>
+        </div>
+        <button class="btn" onclick="checkFinalTest()" data-i18n="finishTest">Завершить тест</button>
+        <div id="final-result" class="test-result" style="display: none;"></div>
+      </div>
+    </section>
+
+    <!-- ЭКРАН ДОСТИЖЕНИЙ -->
+    <section style="text-align: center; background: #ffffff; border-radius: 50px; padding: 2rem; margin: 2rem 0;">
+      <i class="fas fa-award" style="font-size: 4rem; color: #f05b24;"></i>
+      <h3 data-i18n="achievementTitle">Ты изучил инструкцию!</h3>
+      <p data-i18n="achievementDesc">Теперь ты знаешь все шаги контроля: алкотестер, выбор сумки, фотографии по типу, отправку.</p>
+      <div class="digit-block" style="background: #f05b24; color: white;">
+        <i class="fas fa-check"></i> <span data-i18n="rulesPreserved">100% правил сохранено</span>
+      </div>
+    </section>
+
+    <hr>
+    <footer data-i18n="footer">Мчимыч — обучение для курьеров. Все материалы из официальной инструкции.</footer>
+  </div>
+
+  <script>
+    // объект с переводами (ключ: значение)
+    const translations = {
+      ru: {
+        appTitle: 'Мчимыч',
+        appSubtitle: 'Контроль внешнего вида курьера и ТС',
+        timerLabel: '3 минуты — и ты в курсе всех правил',
+        startButton: '🚀 Начать обучение',
+        mockInterface: 'Пример интерфейса: селфи, фото сумки, ТС',
+        courierTypeTitle: 'Тип курьера',
+        courierTypeDesc: 'От твоего типа зависит набор фото и шаги',
+        typePedestrian: 'Пеший',
+        typeBike: 'Велосамокат',
+        typeDriver: 'Водитель доставки',
+        typePersonal: 'Личный авто',
+        photoLabel: '📸 Фото:',
+        photoPedestrian: 'себя + сумка',
+        photoBike: 'себя, сумка, самокат/велосипед',
+        photoDriver: 'себя, сумка, авто с 4 сторон',
+        photoPersonal: 'себя + сумка',
+        noVehicle: 'без ТС',
+        personalVehicle: 'личное ТС',
+        step1Title: 'Шаг 1. Алкотестер и документы',
+        step1Item1: 'Встреться с менеджером доставки (МД)',
+        step1Item2: 'Алкотестер — для всех',
+        step1Item3: 'Путевой лист и акт приёма‑передачи (если есть ТС)',
+        step1Item4: 'Поставь галочку в приложении → шаг помечен «Пройден». Снять нельзя!',
+        step1Warning: 'Без этого шага нельзя получить заказы',
+        quiz1q: '❓ Что обязательно нужно сделать на шаге 1? (выбери ВСЕ подходящие)',
+        quiz1opt1: 'Пройти алкотестер',
+        quiz1opt2: 'Подписать путевой лист / акт (если нужно)',
+        quiz1opt3: 'Выбрать сумку',
+        quiz1opt4: 'Сделать селфи',
+        checkButton: 'Проверить',
+        step2Title: 'Шаг 2. Выбор сумки',
+        step2Desc1: 'Нажми',
+        selectBagButton: 'Выбрать сумку',
+        step2Desc2: 'в приложении. Откроется список доступных сумок ресторана.',
+        step2Warning1: 'ЗАПРЕЩЕНО',
+        step2Warning2: 'выбирать случайную сумку! Номер на фото позже сверят с выбранным.',
+        step2AfterSelect: 'После выбора нажми «Сохранить».',
+        bagListExample: 'Пример списка сумок: №142, №187, №203',
+        quiz2q: '🧐 Ситуация: Иван выбрал в приложении сумку №5, но по факту взял сумку №3. Правильно?',
+        quiz2opt1: 'Да, главное чтобы сумка была',
+        quiz2opt2: 'Нет, номер должен совпадать',
+        answerButton: 'Ответить',
+        step3Title: 'Шаг 3. Фотоконтроль',
+        step3Desc1: 'Все фото делаются только через приложение «Мчимыч» (не из галереи). Каждое фото содержит гео, дату и время.',
+        photoSelfie: 'Селфи',
+        photoFullBody: 'В полный рост',
+        photoBag: 'Сумка (номер)',
+        photoScooter: 'Номер велосамоката',
+        photoCar: 'Авто (4 стороны)',
+        forEachType: 'Для каждого типа:',
+        photoPedestrianList: 'селфи + рост + сумка',
+        photoBikeList: 'селфи + рост + сумка + номер самоката/велосипеда',
+        photoDriverList: 'селфи + рост + сумка + автомобиль (4 стороны, должен быть виден номер)',
+        photoPersonalList: 'селфи + рост + сумка',
+        photoFullBodyTip: 'Фото в полный рост лучше попросить сделать коллегу или использовать зеркало.',
+        quiz3q: '📌 Какой набор фото у велосамоката?',
+        quiz3opt1: 'селфи + сумка',
+        quiz3opt2: 'селфи + рост + сумка',
+        quiz3opt3: 'селфи + рост + сумка + номер самоката',
+        saveSendTitle: 'Сохранение и отправка',
+        saveSendDesc1: 'После съёмки можно нажать на ✏️ (ручку) на неудачном фото и переделать. Если всё ок — «Сохранить».',
+        photoMetadata: 'Фото с метаданными — нельзя подтянуть старые',
+        saveSendDesc2: 'Далее кнопка «Отправить на проверку». Ждём подтверждения.',
+        successCard: 'Успех: «Перейти к заказам»',
+        errorCard: 'Ошибка: написать в Support',
+        noInternet: 'При плохом соединении фото не сохранятся. Дождись связи или обратись в поддержку.',
+        case1Title: '🚶 Пеший курьер — мои фото',
+        showAnswer: 'показать ответ',
+        case1Content: 'Селфи + в полный рост + фото сумки с номером.',
+        case2Title: '🚗 Водитель забыл выбрать ТС',
+        whatToDo: 'что делать?',
+        case2Content: 'Вернуться к шагу 1? Нет, надо выбрать авто в списке ТС перед фото (кнопка «Выберете авто/велосамокат»).',
+        case3Title: '📶 Фото не грузятся',
+        solution: 'решение',
+        case3Content: 'Проверить интернет, перезапустить приложение. Если не помогает — запрос в Support.',
+        finalTestTitle: '✍️ Финальный тест',
+        finalQ1: '1. Сколько сторон автомобиля должен снять водитель доставки?',
+        finalQ1opt1: 'Одну (перед)',
+        finalQ1opt2: 'Две',
+        finalQ1opt3: 'Четыре',
+        finalQ2: '2. Можно ли загрузить фото из галереи телефона?',
+        finalQ2opt1: 'Да',
+        finalQ2opt2: 'Нет, только через камеру приложения',
+        finalQ3: '3. Что делать, если после отправки фото ошибка?',
+        finalQ3opt1: 'Игнорировать, заказы придут',
+        finalQ3opt2: 'Написать в Support',
+        finishTest: 'Завершить тест',
+        achievementTitle: 'Ты изучил инструкцию!',
+        achievementDesc: 'Теперь ты знаешь все шаги контроля: алкотестер, выбор сумки, фотографии по типу, отправку.',
+        rulesPreserved: '100% правил сохранено',
+        footer: 'Мчимыч — обучение для курьеров. Все материалы из официальной инструкции.'
+      },
+      ky: {
+        appTitle: 'Мчимыч',
+        appSubtitle: 'Курьердин жана унаанын сырткы көзөмөлү',
+        timerLabel: '3 мүнөт — эрежелер менен тааныш',
+        startButton: '🚀 Окууну баштоо',
+        mockInterface: 'Интерфейс үлгүсү: селфи, сумка, унаа сүрөттөрү',
+        courierTypeTitle: 'Курьердин түрү',
+        courierTypeDesc: 'Сүрөттөрдүн жыйнагы түрүңө жараша',
+        typePedestrian: 'Жөө',
+        typeBike: 'Велосамокат',
+        typeDriver: 'Жеткирүү айдоочусу',
+        typePersonal: 'Жеке унаа',
+        photoLabel: '📸 Сүрөт:',
+        photoPedestrian: 'өзүң + сумка',
+        photoBike: 'өзүң, сумка, самокат/велосипед',
+        photoDriver: 'өзүң, сумка, унаа 4 тараптан',
+        photoPersonal: 'өзүң + сумка',
+        noVehicle: 'унаасыз',
+        personalVehicle: 'жеке унаа',
+        step1Title: '1-кадам. Алкотестер жана документтер',
+        step1Item1: 'Жеткирүү менеджери менен жолугушуу',
+        step1Item2: 'Алкотестер — баардыгы үчүн',
+        step1Item3: 'Жол баракчасы жана кабыл алуу акты (эгер унаа болсо)',
+        step1Item4: 'Колдонмодо белги кой → кадам "Өттү" деп белгиленет. Артка кайтаруу мүмкүн эмес!',
+        step1Warning: 'Бул кадамсыз заказ алуу мүмкүн эмес',
+        quiz1q: '❓ 1-кадамда эмне кылуу керек? (БААРЫ туура варианттарды танда)',
+        quiz1opt1: 'Алкотестерден өтүү',
+        quiz1opt2: 'Жол баракчасына/актыга кол коюу (керек болсо)',
+        quiz1opt3: 'Сумка тандоо',
+        quiz1opt4: 'Селфи тартуу',
+        checkButton: 'Текшерүү',
+        step2Title: '2-кадам. Сумка тандоо',
+        step2Desc1: 'Баскычты бас',
+        selectBagButton: 'Сумка тандоо',
+        step2Desc2: 'колдонмодо. Ресторандын сумкаларынын тизмеси чыгат.',
+        step2Warning1: 'ТЫЮУ САЛЫНАТ',
+        step2Warning2: 'кокустан сумка тандоого! Кийин сүрөттөгү номер тандалган номер менен текшерилет.',
+        step2AfterSelect: 'Тандагандан кийин "Сактоо" баскычын бас.',
+        bagListExample: 'Сумкалардын үлгү тизмеси: №142, №187, №203',
+        quiz2q: '🧐 Кырдаал: Иван колдонмодо №5 сумканы тандады, бирок чындыгында №3 сумканы алды. Туурабы?',
+        quiz2opt1: 'Ооба, сумка болсо болду',
+        quiz2opt2: 'Жок, номер дал келиши керек',
+        answerButton: 'Жооп берүү',
+        step3Title: '3-кадам. Сүрөт көзөмөлү',
+        step3Desc1: 'Бардык сүрөттөр "Мчимыч" колдонмосу аркылуу тартылат (галереядан эмес). Ар бир сүрөттө гео, дата, убакыт болот.',
+        photoSelfie: 'Селфи',
+        photoFullBody: 'Толук бойдон',
+        photoBag: 'Сумка (номери)',
+        photoScooter: 'Велосамокаттын номери',
+        photoCar: 'Унаа (4 тарап)',
+        forEachType: 'Ар бир түр үчүн:',
+        photoPedestrianList: 'селфи + бойдон + сумка',
+        photoBikeList: 'селфи + бойдон + сумка + самокат/велосипед номери',
+        photoDriverList: 'селфи + бойдон + сумка + унаа (4 тарап, номери көрүнүшү керек)',
+        photoPersonalList: 'селфи + бойдон + сумка',
+        photoFullBodyTip: 'Толук бойдон сүрөттү кесиптешиңизден же күзгүдөн тартууну сураныңыз.',
+        quiz3q: '📌 Велосамокат үчүн кандай сүрөт жыйнагы керек?',
+        quiz3opt1: 'селфи + сумка',
+        quiz3opt2: 'селфи + бойдон + сумка',
+        quiz3opt3: 'селфи + бойдон + сумка + самокат номери',
+        saveSendTitle: 'Сактоо жана жөнөтүү',
+        saveSendDesc1: 'Тарткандан кийин ийгиликсиз сүрөттү ✏️ басып кайра тартса болот. Баары жакшы болсо — "Сактоо".',
+        photoMetadata: 'Метабелгилери бар сүрөттөр — эски сүрөттөрдү колдонууга болбойт',
+        saveSendDesc2: 'Андан кийин "Текшерүүгө жөнөтүү" баскычы. Күтөбүз.',
+        successCard: 'Ийгилик: "Заказдарга өтүү"',
+        errorCard: 'Ката: Support жазуу',
+        noInternet: 'Интернет начар болсо сүрөттөр сакталбайт. Байланышты күт же колдоого кайрыл.',
+        case1Title: '🚶 Жөө курьер — менин сүрөттөрүм',
+        showAnswer: 'жоопту көрсөт',
+        case1Content: 'Селфи + толук бойдон + сумканын номери.',
+        case2Title: '🚗 Айдоочу унааны тандоону унутуп койду',
+        whatToDo: 'эмне кылуу керек?',
+        case2Content: '1-кадамга кайтуу? Жок, сүрөткө чейин унааны тизмеден тандоо керек ("Унаа/велосамокат тандоо" баскычы).',
+        case3Title: '📶 Сүрөттөр жүктөлбөй жатат',
+        solution: 'чечим',
+        case3Content: 'Интернетти текшер, колдонмону кайра күйгүз. Жардам бербесе — Support кайрыл.',
+        finalTestTitle: '✍️ Акыркы тест',
+        finalQ1: '1. Жеткирүү айдоочусу унаанын канча тарабын сүрөткө тартууга тийиш?',
+        finalQ1opt1: 'Бир (алды)',
+        finalQ1opt2: 'Эки',
+        finalQ1opt3: 'Төрт',
+        finalQ2: '2. Сүрөттү телефон галереясынан жүктөөгө болобу?',
+        finalQ2opt1: 'Ооба',
+        finalQ2opt2: 'Жок, колдонмонун камерасы аркылуу гана',
+        finalQ3: '3. Сүрөттөрдү жөнөткөндөн кийин ката чыкса, эмне кылуу керек?',
+        finalQ3opt1: 'Этибар бербей коюу, заказдар келет',
+        finalQ3opt2: 'Support жазуу',
+        finishTest: 'Тестти бүтүрүү',
+        achievementTitle: 'Сен инструкцияны окуп бүттүң!',
+        achievementDesc: 'Эми сен көзөмөлдүн бардык кадамдарын билесиң: алкотестер, сумка тандоо, тип боюнча сүрөттөр, жөнөтүү.',
+        rulesPreserved: '100% эрежелер сакталды',
+        footer: 'Мчимыч — курьерлер үчүн окутуу. Бардык материалдар расмий инструкциядан.'
+      },
+      tg: {
+        appTitle: 'Мчимыч',
+        appSubtitle: 'Назорати намуди зоҳирии курьер ва воситаи нақлиёт',
+        timerLabel: '3 дақиқа — ва шумо аз ҳамаи қоидаҳо огоҳед',
+        startButton: '🚀 Оғози омӯзиш',
+        mockInterface: 'Намунаи интерфейс: селфи, сумати бор, воситаи нақлиёт',
+        courierTypeTitle: 'Намуди курьер',
+        courierTypeDesc: 'Маҷмӯи аксҳо аз намуди шумо вобаста аст',
+        typePedestrian: 'Пиёда',
+        typeBike: 'Велосамокат',
+        typeDriver: 'Ронандаи интиқол',
+        typePersonal: 'Автомобили шахсӣ',
+        photoLabel: '📸 Акс:',
+        photoPedestrian: 'худат + сумка',
+        photoBike: 'худат, сумка, самокат/велосипед',
+        photoDriver: 'худат, сумка, автомобил аз 4 тараф',
+        photoPersonal: 'худат + сумка',
+        noVehicle: 'бе воситаи нақлиёт',
+        personalVehicle: 'автомобили шахсӣ',
+        step1Title: 'Қадами 1. Алкотестер ва ҳуҷҷатҳо',
+        step1Item1: 'Бо менеджери интиқол вомӯхтан',
+        step1Item2: 'Алкотестер — барои ҳама',
+        step1Item3: 'Варақаи роҳ ва акти қабулу супоридан (агар воситаи нақлиёт бошад)',
+        step1Item4: 'Дар барнома каналогӣ гузоред — қадам "Гузашта" мешавад. Бардоштан мумкин нест!',
+        step1Warning: 'Бе ин қадам фармоиш гирифтан мумкин нест',
+        quiz1q: '❓ Дар қадами 1 чӣ кор кардан лозим? (ҲАМАИ вариантҳои дурустро интихоб кунед)',
+        quiz1opt1: 'Аз алкотестер гузаштан',
+        quiz1opt2: 'Имзои варақаи роҳ / акт (агар лозим бошад)',
+        quiz1opt3: 'Сумка интихоб кардан',
+        quiz1opt4: 'Селфи гирифтан',
+        checkButton: 'Санҷидан',
+        step2Title: 'Қадами 2. Интихоби сумка',
+        step2Desc1: 'Тугмаро пахш кунед',
+        selectBagButton: 'Сумка интихоб кунед',
+        step2Desc2: 'дар барнома. Феҳристи сумкаҳои дастраси ресторан кушода мешавад.',
+        step2Warning1: 'МАНЪ АСТ',
+        step2Warning2: 'интихоби тасодуфии сумка! Рақам дар акс баъд бо рақами интихобшуда муқоиса карда мешавад.',
+        step2AfterSelect: 'Пас аз интихоб тугмаи "Сабт кардан"-ро пахш кунед.',
+        bagListExample: 'Намунаи феҳристи сумкаҳо: №142, №187, №203',
+        quiz2q: '🧐 Вазифа: Иван дар барнома сумкаи №5-ро интихоб кард, вале дар асл сумкаи №3-ро гирифт. Дуруст аст?',
+        quiz2opt1: 'Ҳа, асосиаш сумка бошад',
+        quiz2opt2: 'Не, рақам бояд мувофиқат кунад',
+        answerButton: 'Ҷавоб додан',
+        step3Title: 'Қадами 3. Назорати аксҳо',
+        step3Desc1: 'Ҳамаи аксҳо танҳо тавассути барномаи "Мчимыч" гирифта мешаванд (аз галерея не). Ҳар акс дорои гео, сана ва вақт аст.',
+        photoSelfie: 'Селфи',
+        photoFullBody: 'Пуррақад',
+        photoBag: 'Сумка (рақам)',
+        photoScooter: 'Рақами велосамокат',
+        photoCar: 'Автомобил (4 тараф)',
+        forEachType: 'Барои ҳар намуд:',
+        photoPedestrianList: 'селфи + пуррақад + сумка',
+        photoBikeList: 'селфи + пуррақад + сумка + рақами самокат/велосипед',
+        photoDriverList: 'селфи + пуррақад + сумка + автомобил (4 тараф, рақам намоён бошад)',
+        photoPersonalList: 'селфи + пуррақад + сумка',
+        photoFullBodyTip: 'Акси пуррақадро аз ҳамкор ё оина пурсед.',
+        quiz3q: '📌 Барои велосамокат кадом маҷмӯи аксҳо лозим аст?',
+        quiz3opt1: 'селфи + сумка',
+        quiz3opt2: 'селфи + пуррақад + сумка',
+        quiz3opt3: 'селфи + пуррақад + сумка + рақами самокат',
+        saveSendTitle: 'Сабт ва фиристодан',
+        saveSendDesc1: 'Пас аз акс гирифтан, дар сурати номуваффақ будан, тугмаи ✏️-ро пахш карда, дубора гиред. Агар ҳамааш хуб бошад — "Сабт кардан".',
+        photoMetadata: 'Аксҳо бо метамаълумот — аксҳои кӯҳнаро бор кардан мумкин нест',
+        saveSendDesc2: 'Сипас тугмаи "Ба санҷиш фиристодан". Мунтазири тасдиқ.',
+        successCard: 'Муваффақият: "Гузаштан ба фармоишҳо"',
+        errorCard: 'Хатогӣ: ба Support нависед',
+        noInternet: 'Ҳангоми пайвасти суст аксҳо сабт намешаванд. Пайвастро интизор шавед ё ба дастгирӣ муроҷиат кунед.',
+        case1Title: '🚶 Курьери пиёда — аксҳои ман',
+        showAnswer: 'ҷавоб нишон додан',
+        case1Content: 'Селфи + пуррақад + акси сумка бо рақам.',
+        case2Title: '🚗 Ронанда интихоби воситаи нақлиётро фаромӯш кард',
+        whatToDo: 'чӣ бояд кард?',
+        case2Content: 'Ба қадами 1 баргардем? Не, пеш аз акс гирифтан воситаи нақлиёт аз феҳрист интихоб кардан лозим (тугмаи "Авто/велосамокат интихоб кунед").',
+        case3Title: '📶 Аксҳо бор намешаванд',
+        solution: 'ҳалли масъала',
+        case3Content: 'Интернетро санҷед, барномаро аз нав кушоед. Агар кӯмак накунад — ба Support муроҷиат кунед.',
+        finalTestTitle: '✍️ Тести ниҳоӣ',
+        finalQ1: '1. Ронандаи интиқол автомобилро аз чанд тараф акс гирифтан лозим аст?',
+        finalQ1opt1: 'Як (пеш)',
+        finalQ1opt2: 'Ду',
+        finalQ1opt3: 'Чор',
+        finalQ2: '2. Оё аксро аз галереяи телефон бор кардан мумкин аст?',
+        finalQ2opt1: 'Ҳа',
+        finalQ2opt2: 'Не, танҳо тавассути камераи барнома',
+        finalQ3: '3. Агар пас аз фиристодани акс хатогӣ рӯй диҳад, чӣ бояд кард?',
+        finalQ3opt1: 'Нодида гиред, фармоишҳо меоянд',
+        finalQ3opt2: 'Ба Support нависед',
+        finishTest: 'Тестро ба итмом расонед',
+        achievementTitle: 'Шумо дастурамалро омӯхтед!',
+        achievementDesc: 'Акнун шумо ҳамаи қадамҳои назоратро медонед: алкотестер, интихоби сумка, аксҳо аз рӯи намуд, фиристодан.',
+        rulesPreserved: '100% қоидаҳо нигоҳ дошта шуданд',
+        footer: 'Мчимыч — омӯзиш барои курьерҳо. Ҳамаи мавод аз дастурамали расмӣ.'
+      },
+      uz: {
+        appTitle: 'Mchimychni',
+        appSubtitle: 'Kuryer va transport vositasining tashqi ko‘rinishini nazorat qilish',
+        timerLabel: '3 daqiqa — va siz barcha qoidalardan xabardorsiz',
+        startButton: '🚀 O‘rganishni boshlash',
+        mockInterface: 'Interfeys namunasi: selfi, sumka, transport vositasi',
+        courierTypeTitle: 'Kuryer turi',
+        courierTypeDesc: 'Sizning turingizga qarab fotosuratlar to‘plami farqlanadi',
+        typePedestrian: 'Piyoda',
+        typeBike: 'Velosamokat',
+        typeDriver: 'Yetkazib berish haydovchisi',
+        typePersonal: 'Shaxsiy avtomobil',
+        photoLabel: '📸 Fotosurat:',
+        photoPedestrian: 'o‘zing + sumka',
+        photoBike: 'o‘zing, sumka, samokat/velosiped',
+        photoDriver: 'o‘zing, sumka, avtomobil 4 tomondan',
+        photoPersonal: 'o‘zing + sumka',
+        noVehicle: 'transport vositasisiz',
+        personalVehicle: 'shaxsiy transport',
+        step1Title: '1-qadam. Alkotester va hujjatlar',
+        step1Item1: 'Yetkazib berish menejeri bilan uchrashish',
+        step1Item2: 'Alkotester — hamma uchun',
+        step1Item3: 'Yo‘l varaqasi va qabul qilish-topshirish dalolatnomasi (agar transport vositasi bo‘lsa)',
+        step1Item4: 'Ilovada belgi qo‘ying → qadam "O‘tildi" deb belgilanadi. Orqaga qaytarib bo‘lmaydi!',
+        step1Warning: 'Bu qadamsiz buyurtma olish mumkin emas',
+        quiz1q: '❓ 1-qadamda nima qilish kerak? (BARCHA to‘g‘ri variantlarni tanlang)',
+        quiz1opt1: 'Alkotesterdan o‘tish',
+        quiz1opt2: 'Yo‘l varaqasi / dalolatnomaga imzo chekish (kerak bo‘lsa)',
+        quiz1opt3: 'Sumka tanlash',
+        quiz1opt4: 'Selfi olish',
+        checkButton: 'Tekshirish',
+        step2Title: '2-qadam. Sumka tanlash',
+        step2Desc1: 'Tugmani bosing',
+        selectBagButton: 'Sumka tanlash',
+        step2Desc2: 'ilovada. Restoranning mavjud sumkalari ro‘yxati ochiladi.',
+        step2Warning1: 'TA’QIQLANADI',
+        step2Warning2: 'tasodifiy sumka tanlash! Fotosuratdagi raqam keyin tanlangan raqam bilan solishtiriladi.',
+        step2AfterSelect: 'Tanlagandan so‘ng "Saqlash" tugmasini bosing.',
+        bagListExample: 'Sumkalar ro‘yxati namunasi: №142, №187, №203',
+        quiz2q: '🧐 Vaziyat: Ivan ilovada №5 sumkani tanladi, lekin aslida №3 sumkani oldi. To‘g‘rimi?',
+        quiz2opt1: 'Ha, asosiysi sumka bo‘lsa',
+        quiz2opt2: 'Yo‘q, raqam mos kelishi kerak',
+        answerButton: 'Javob berish',
+        step3Title: '3-qadam. Fotosurat nazorati',
+        step3Desc1: 'Barcha fotosuratlar faqat "Mchimychni" ilovasi orqali olinadi (galereyadan emas). Har bir fotosuratda geo, sana va vaqt mavjud.',
+        photoSelfie: 'Selfi',
+        photoFullBody: 'To‘liq bo‘y',
+        photoBag: 'Sumka (raqam)',
+        photoScooter: 'Velosamokat raqami',
+        photoCar: 'Avtomobil (4 tomon)',
+        forEachType: 'Har bir tur uchun:',
+        photoPedestrianList: 'selfi + to‘liq bo‘y + sumka',
+        photoBikeList: 'selfi + to‘liq bo‘y + sumka + samokat/velosiped raqami',
+        photoDriverList: 'selfi + to‘liq bo‘y + sumka + avtomobil (4 tomon, raqami ko‘rinishi kerak)',
+        photoPersonalList: 'selfi + to‘liq bo‘y + sumka',
+        photoFullBodyTip: 'To‘liq bo‘yli suratni hamkasbdan yoki oynada suratga olishni so‘rang.',
+        quiz3q: '📌 Velosamokat uchun qanday fotosuratlar to‘plami kerak?',
+        quiz3opt1: 'selfi + sumka',
+        quiz3opt2: 'selfi + to‘liq bo‘y + sumka',
+        quiz3opt3: 'selfi + to‘liq bo‘y + sumka + samokat raqami',
+        saveSendTitle: 'Saqlash va jo‘natish',
+        saveSendDesc1: 'Suratga olgandan so‘ng muvaffaqiyatsiz suratni ✏️ tugmasini bosib qaytadan olish mumkin. Hammasi yaxshi bo‘lsa — "Saqlash".',
+        photoMetadata: 'Metama’lumotli suratlar — eski suratlarni yuklab bo‘lmaydi',
+        saveSendDesc2: 'Keyin "Tekshiruvga jo‘natish" tugmasi. Tasdiqni kuting.',
+        successCard: 'Muvaffaqiyat: "Buyurtmalarga o‘tish"',
+        errorCard: 'Xato: Support’ga yozing',
+        noInternet: 'Ulanish yomon bo‘lsa, suratlar saqlanmaydi. Aloqani kuting yoki qo‘llab-quvvatlashga murojaat qiling.',
+        case1Title: '🚶 Piyoda kuryer — mening suratlarim',
+        showAnswer: 'javobni ko‘rsatish',
+        case1Content: 'Selfi + to‘liq bo‘y + sumka raqami.',
+        case2Title: '🚗 Haydovchi transport vositasini tanlashni unutdi',
+        whatToDo: 'nima qilish kerak?',
+        case2Content: '1-qadamga qaytish? Yo‘q, suratga olishdan oldin transport vositasini ro‘yxatdan tanlash kerak ("Avto/velosamokat tanlang" tugmasi).',
+        case3Title: '📶 Suratlar yuklanmayapti',
+        solution: 'yechim',
+        case3Content: 'Internetni tekshiring, ilovani qayta ishga tushiring. Agar yordam bermasa — Support’ga murojaat qiling.',
+        finalTestTitle: '✍️ Yakuniy test',
+        finalQ1: '1. Yetkazib berish haydovchisi avtomobilni necha tomondan suratga olishi kerak?',
+        finalQ1opt1: 'Bitta (old)',
+        finalQ1opt2: 'Ikki',
+        finalQ1opt3: 'To‘rt',
+        finalQ2: '2. Suratni telefon galereyasidan yuklash mumkinmi?',
+        finalQ2opt1: 'Ha',
+        finalQ2opt2: "Yo‘q, faqat ilova kamerasi orqali",
+        finalQ3: '3. Suratlarni jo‘natgandan keyin xato chiqsa, nima qilish kerak?',
+        finalQ3opt1: 'E’tibor bermaslik, buyurtmalar keladi',
+        finalQ3opt2: 'Support’ga yozing',
+        finishTest: 'Testni yakunlash',
+        achievementTitle: 'Siz yo‘riqnomani o‘rgandingiz!',
+        achievementDesc: 'Endi siz nazoratning barcha qadamlarini bilasiz: alkotester, sumka tanlash, tur bo‘yicha suratlar, jo‘natish.',
+        rulesPreserved: '100% qoidalar saqlandi',
+        footer: 'Mchimychni — kuryerlar uchun o‘quv materiali. Barcha materiallar rasmiy yo‘riqnomadan.'
+      }
+    };
+
+    // переключение языка
+    const langButtons = document.querySelectorAll('.lang-btn');
+    let currentLang = 'ru';
+
+    function applyLanguage(lang) {
+      const elements = document.querySelectorAll('[data-i18n]');
+      elements.forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+          el.innerText = translations[lang][key];
+        } else {
+          // fallback to russian if key missing
+          if (translations['ru'][key]) el.innerText = translations['ru'][key];
         }
+      });
+      // update active button
+      langButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-lang') === lang) btn.classList.add('active');
+      });
+      currentLang = lang;
+    }
 
-        function saveUser(user) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            currentUser = user;
-        }
+    langButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const lang = e.target.getAttribute('data-lang');
+        applyLanguage(lang);
+      });
+    });
 
-        function logout() {
-            localStorage.removeItem('currentUser');
-            currentUser = null;
-            navigate('mainMenu');
-        }
+    // остальные функции (без изменений)
+    function selectType(type) {
+      let hintDiv = document.getElementById('type-hint');
+      let hintText = document.getElementById('type-hint-text');
+      let msg = '';
+      if (type === 'pedestrian') msg = translations[currentLang].typePedestrian + ': ' + translations[currentLang].photoPedestrian + ' (ТС не требуется)';
+      else if (type === 'bike') msg = translations[currentLang].typeBike + ': селфи, рост, сумка, номер самоката/велосипеда';
+      else if (type === 'driver') msg = translations[currentLang].typeDriver + ': селфи, рост, сумка, авто с 4 сторон (номер виден)';
+      else if (type === 'personal') msg = translations[currentLang].typePersonal + ': селфи + рост + сумка';
+      hintText.innerText = msg;
+      hintDiv.style.display = 'block';
 
-        // Получить ТС для ресторана пользователя
-        function getVehiclesForRestaurant() {
-            if (!currentUser) return [];
-            return VEHICLES_DATA.filter(v => v.restaurant === currentUser.restaurant);
-        }
+      document.querySelectorAll('.card').forEach(c => c.style.border = '2px solid transparent');
+      document.getElementById('type-'+type).style.border = '2px solid #f05b24';
+    }
 
-        // Получить список проверенных сегодня ТС (из localStorage)
-        function getCheckedVehiclesToday() {
-            if (!currentUser) return [];
-            const key = `checked_${currentUser.restaurant}_${new Date().toLocaleDateString('ru-RU')}`;
-            return JSON.parse(localStorage.getItem(key) || '[]');
-        }
+    function toggleCase(id) {
+      let el = document.getElementById('case'+id);
+      el.classList.toggle('active');
+      let btn = el.querySelector('.case-btn');
+      if (el.classList.contains('active')) {
+        btn.innerText = translations[currentLang].showAnswer || 'скрыть ответ';
+      } else {
+        btn.innerText = translations[currentLang].showAnswer || 'показать ответ';
+      }
+    }
 
-        // Отметить ТС как проверенное сегодня
-        function markVehicleChecked(plate) {
-            const key = `checked_${currentUser.restaurant}_${new Date().toLocaleDateString('ru-RU')}`;
-            const checked = getCheckedVehiclesToday();
-            if (!checked.includes(plate)) {
-                checked.push(plate);
-                localStorage.setItem(key, JSON.stringify(checked));
-            }
-        }
+    function checkQuiz1() {
+      let checks = document.querySelectorAll('input[name="q1"]:checked');
+      let values = Array.from(checks).map(c => c.value);
+      let correct = (values.includes('alco') && values.includes('docs') && !values.includes('bag') && !values.includes('photo'));
+      let fb = document.getElementById('quiz1-feedback');
+      fb.classList.remove('correct', 'incorrect');
+      if (correct) {
+        fb.className = 'quiz-feedback correct';
+        fb.innerText = '✅ Верно! Алкотестер и документы (галочка) — обязательны. Сумку и фото на шаге 1 не делаем.';
+      } else {
+        fb.className = 'quiz-feedback incorrect';
+        fb.innerText = '❌ Ошибка. На шаге 1: алкотестер + документы/галочка. Без выбора сумки и фото.';
+      }
+    }
 
-        // Проверка, все ли ТС проверены сегодня
-        function allVehiclesChecked() {
-            const vehicles = getVehiclesForRestaurant();
-            const checked = getCheckedVehiclesToday();
-            return vehicles.length > 0 && vehicles.every(v => checked.includes(v.plate));
-        }
+    function checkBagMistake() {
+      let selected = document.querySelector('input[name="bagMistake"]:checked');
+      let fb = document.getElementById('bag-feedback');
+      fb.classList.remove('correct', 'incorrect');
+      if (!selected) {
+        fb.className = 'quiz-feedback incorrect';
+        fb.innerText = 'Выбери вариант';
+        return;
+      }
+      if (selected.value === 'no') {
+        fb.className = 'quiz-feedback correct';
+        fb.innerText = '✅ Верно! Номер на фото сверят с выбранным в приложении. Совпадение обязательно.';
+      } else {
+        fb.className = 'quiz-feedback incorrect';
+        fb.innerText = '❌ Неправильно. Нельзя брать другую сумку — номер не совпадет.';
+      }
+    }
 
-        // Получить проверенные блоки доставки сегодня
-        function getCheckedDeliveryBlocks() {
-            if (!currentUser) return [];
-            const key = `delivery_${currentUser.restaurant}_${new Date().toLocaleDateString('ru-RU')}`;
-            return JSON.parse(localStorage.getItem(key) || '[]');
-        }
+    function checkPhotoSet() {
+      let selected = document.querySelector('input[name="photoSet"]:checked');
+      let fb = document.getElementById('photoset-feedback');
+      fb.classList.remove('correct', 'incorrect');
+      if (!selected) return;
+      if (selected.value === 'correct') {
+        fb.className = 'quiz-feedback correct';
+        fb.innerText = '✅ Да! Велосамокат: селфи + рост + сумка + номер самоката.';
+      } else {
+        fb.className = 'quiz-feedback incorrect';
+        fb.innerText = '❌ Нет. Для велосамоката нужно ещё фото номера самоката/велосипеда.';
+      }
+    }
 
-        // Отметить блок как проверенный
-        function markDeliveryBlockChecked(blockName) {
-            const key = `delivery_${currentUser.restaurant}_${new Date().toLocaleDateString('ru-RU')}`;
-            const checked = getCheckedDeliveryBlocks();
-            if (!checked.includes(blockName)) {
-                checked.push(blockName);
-                localStorage.setItem(key, JSON.stringify(checked));
-            }
-        }
+    function checkFinalTest() {
+      let q1 = document.querySelector('input[name="f1"]:checked');
+      let q2 = document.querySelector('input[name="f2"]:checked');
+      let q3 = document.querySelector('input[name="f3"]:checked');
+      let resDiv = document.getElementById('final-result');
+      resDiv.style.display = 'block';
 
-        // Все блоки проверены?
-        function allDeliveryBlocksChecked() {
-            const checked = getCheckedDeliveryBlocks();
-            return DELIVERY_BLOCKS.every(b => checked.includes(b.name));
-        }
+      let score = 0;
+      if (q1 && q1.value === '2') score++;
+      if (q2 && q2.value === 'no') score++;
+      if (q3 && q3.value === 'support') score++;
 
-        // Навигация
-        function navigate(screen, param = null) {
-            currentScreen = screen;
-            render(param);
-        }
+      if (score === 3) {
+        resDiv.innerText = '🏆 Идеально! 3/3. Ты готов к смене!';
+        resDiv.style.background = '#1e6f3f';
+      } else {
+        resDiv.innerText = `📌 Твой результат: ${score}/3. Повтори разделы, где ошибся.`;
+        resDiv.style.background = '#b33a3a';
+      }
+    }
 
-        // ---------- Рендеринг ----------
-        function render(param) {
-            const content = document.getElementById('content');
-            const headerTitle = document.getElementById('headerTitle');
-            const backBtn = document.getElementById('backBtn');
-            const menuBtn = document.getElementById('menuBtn');
-
-            // Управление видимостью кнопки назад
-            if (currentScreen === 'mainMenu' || currentScreen === 'register') {
-                backBtn.style.visibility = 'hidden';
-            } else {
-                backBtn.style.visibility = 'visible';
-            }
-
-            if (!currentUser && currentScreen !== 'register' && currentScreen !== 'mainMenu') {
-                navigate('register');
-                return;
-            }
-
-            switch (currentScreen) {
-                case 'mainMenu':
-                    headerTitle.innerText = 'Главное меню';
-                    renderMainMenu(content);
-                    break;
-                case 'register':
-                    headerTitle.innerText = 'Регистрация';
-                    renderRegister(content);
-                    break;
-                case 'restaurantOpen':
-                    headerTitle.innerText = 'Открытие ресторана';
-                    renderRestaurantOpen(content);
-                    break;
-                case 'vehicleList':
-                    headerTitle.innerText = 'Проверка ТС';
-                    renderVehicleList(content);
-                    break;
-                case 'vehiclePhotos':
-                    headerTitle.innerText = 'Фото ТС';
-                    renderVehiclePhotos(content);
-                    break;
-                case 'vehicleChecklist':
-                    headerTitle.innerText = 'Чек-лист ТС';
-                    renderVehicleChecklist(content);
-                    break;
-                case 'vehicleProblemComment':
-                    headerTitle.innerText = 'Комментарий к проблеме';
-                    renderProblemComment(content, param);
-                    break;
-                case 'vehicleProblemPhoto':
-                    headerTitle.innerText = 'Фото проблемы';
-                    renderProblemPhoto(content, param);
-                    break;
-                case 'deliveryBlocks':
-                    headerTitle.innerText = 'Проверка доставки';
-                    renderDeliveryBlocks(content);
-                    break;
-                case 'deliveryBlockDetail':
-                    headerTitle.innerText = 'Блок доставки';
-                    renderDeliveryBlockDetail(content, param);
-                    break;
-                case 'deliveryComment':
-                    headerTitle.innerText = 'Комментарий';
-                    renderDeliveryComment(content, param);
-                    break;
-                case 'knowledgeBase':
-                    headerTitle.innerText = 'База знаний';
-                    renderKnowledgeBase(content);
-                    break;
-                case 'profile':
-                    headerTitle.innerText = 'Мой профиль';
-                    renderProfile(content);
-                    break;
-                case 'support':
-                    headerTitle.innerText = 'Поддержка';
-                    renderSupport(content);
-                    break;
-                case 'adminPanel':
-                    headerTitle.innerText = 'Админ панель';
-                    renderAdminPanel(content);
-                    break;
-                default:
-                    renderMainMenu(content);
-            }
-        }
-
-        // ---------- Экран: Главное меню ----------
-        function renderMainMenu(container) {
-            if (!currentUser) {
-                container.innerHTML = `
-                    <div class="text-center">
-                        <p style="margin-bottom: 20px;">Добро пожаловать! Для работы необходимо зарегистрироваться.</p>
-                        <button class="button" onclick="navigate('register')">Зарегистрироваться</button>
-                    </div>
-                `;
-                return;
-            }
-            let html = `
-                <div class="menu-grid">
-                    <div class="menu-row">
-                        <div class="menu-btn-large" onclick="navigate('restaurantOpen')">
-                            <span>🏘️</span> Открытие ресторана
-                        </div>
-                        <div class="menu-btn-large" onclick="navigate('knowledgeBase')">
-                            <span>📚</span> База знаний
-                        </div>
-                    </div>
-                    <div class="menu-row">
-                        <div class="menu-btn-large" onclick="navigate('profile')">
-                            <span>👤</span> Мой профиль
-                        </div>
-                        <div class="menu-btn-large" onclick="navigate('support')">
-                            <span>🆘</span> Поддержка
-                        </div>
-                    </div>
-                </div>
-            `;
-            // Проверка на администратора (для демо: если ФИО содержит "Админ" или ID=517383463)
-            if (currentUser.fullName.includes('Админ') || currentUser.userId === 517383463) {
-                html += `
-                    <div class="menu-row" style="margin-top: 12px;">
-                        <div class="menu-btn-large" style="background:#e7f1ff;" onclick="navigate('adminPanel')">
-                            <span>👑</span> Админ панель
-                        </div>
-                    </div>
-                `;
-            }
-            html += `<button class="button button-outline mt-4" onclick="logout()">Выйти</button>`;
-            container.innerHTML = html;
-        }
-
-        // ---------- Экран: Регистрация ----------
-        function renderRegister(container) {
-            container.innerHTML = `
-                <form id="registerForm">
-                    <div class="form-group">
-                        <label>ФИО (Фамилия Имя Отчество)</label>
-                        <input type="text" id="fullName" placeholder="Иванов Иван Иванович" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Должность</label>
-                        <select id="position">
-                            <option value="Менеджер доставки">Менеджер доставки</option>
-                            <option value="Оператор доставки">Оператор доставки</option>
-                            <option value="Зам. директора">Зам. директора</option>
-                            <option value="Директор">Директор</option>
-                            <option value="Территориальный управляющий">Территориальный управляющий</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Ресторан</label>
-                        <select id="restaurant">
-                            ${RESTAURANTS.map(r => `<option value="${r}">${r}</option>`).join('')}
-                        </select>
-                    </div>
-                    <button type="submit" class="button">Зарегистрироваться</button>
-                </form>
-            `;
-            document.getElementById('registerForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const fullName = document.getElementById('fullName').value.trim();
-                if (fullName.split(' ').length < 2) {
-                    alert('Введите минимум фамилию и имя');
-                    return;
-                }
-                const user = {
-                    userId: Date.now(), // уникальный ID
-                    fullName: fullName,
-                    position: document.getElementById('position').value,
-                    restaurant: document.getElementById('restaurant').value,
-                    registered: new Date().toLocaleString()
-                };
-                saveUser(user);
-                navigate('mainMenu');
-            });
-        }
-
-        // ---------- Экран: Открытие ресторана (подменю) ----------
-        function renderRestaurantOpen(container) {
-            container.innerHTML = `
-                <div class="menu-grid">
-                    <div class="menu-row">
-                        <div class="menu-btn-large" onclick="navigate('vehicleList')">
-                            <span>🚗</span> Проверка ТС
-                        </div>
-                        <div class="menu-btn-large" onclick="navigate('deliveryBlocks')">
-                            <span>📦</span> Проверка доставки
-                        </div>
-                    </div>
-                </div>
-                <button class="button button-outline mt-4" onclick="navigate('mainMenu')">🔙 Назад</button>
-            `;
-        }
-
-        // ---------- Экран: Список ТС ----------
-        function renderVehicleList(container) {
-            const vehicles = getVehiclesForRestaurant();
-            const checkedToday = getCheckedVehiclesToday();
-            let html = `<p>Ресторан: <strong>${currentUser.restaurant}</strong></p>`;
-            vehicles.forEach(v => {
-                const checked = checkedToday.includes(v.plate);
-                html += `
-                    <div class="list-item" onclick="selectVehicle('${v.plate}')">
-                        <div>
-                            <div class="list-item-title">${v.plate} (${v.model})</div>
-                            <div class="list-item-sub">${checked ? '✅ проверено' : '⏳ не проверено'}</div>
-                        </div>
-                        <span>➡️</span>
-                    </div>
-                `;
-            });
-            html += `<button class="button button-outline mt-4" onclick="navigate('restaurantOpen')">🔙 Назад</button>`;
-            container.innerHTML = html;
-        }
-
-        window.selectVehicle = (plate) => {
-            const vehicles = getVehiclesForRestaurant();
-            currentVehicle = vehicles.find(v => v.plate === plate);
-            // Сброс состояния для нового ТС
-            vehiclePhotos = [null, null, null, null, null, null];
-            vehicleChecklist = {};
-            for (let i = 0; i < CHECK_POINTS.length; i++) {
-                vehicleChecklist[i] = 'ok';
-            }
-            problemComments = {};
-            problemPhotos = {};
-            navigate('vehiclePhotos');
-        };
-
-        // ---------- Экран: Загрузка 6 фото ТС ----------
-        function renderVehiclePhotos(container) {
-            const photoLabels = ['Вид спереди', 'Вид справа', 'Вид сзади', 'Вид слева', 'Салон', 'Приборная панель'];
-            let html = `<p><strong>${currentVehicle.plate} (${currentVehicle.model})</strong></p>`;
-            html += `<div class="photo-grid">`;
-            for (let i = 0; i < 6; i++) {
-                html += `
-                    <div class="photo-item">
-                        <div class="photo-label">${i+1}. ${photoLabels[i]}</div>
-                        <input type="file" accept="image/*" capture="environment" id="photo${i}" onchange="handlePhoto(${i}, event)">
-                        ${vehiclePhotos[i] ? `<img src="${vehiclePhotos[i]}" class="photo-preview">` : ''}
-                    </div>
-                `;
-            }
-            html += `</div>`;
-            const allDone = vehiclePhotos.every(p => p !== null);
-            html += `<button class="button" onclick="nextAfterPhotos()" ${!allDone ? 'disabled' : ''}>✅ Далее</button>`;
-            html += `<button class="button button-outline mt-2" onclick="navigate('vehicleList')">🔙 Назад</button>`;
-            container.innerHTML = html;
-        }
-
-        window.handlePhoto = (index, event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const dataUrl = e.target.result;
-                // Добавляем водяной знак (номер ТС + дата)
-                addWatermark(dataUrl, `${currentVehicle.plate} ${new Date().toLocaleString()}`).then(watermarked => {
-                    vehiclePhotos[index] = watermarked;
-                    renderVehiclePhotos(document.getElementById('content'));
-                });
-            };
-            reader.readAsDataURL(file);
-        };
-
-        // Функция наложения водяного знака (через canvas)
-        async function addWatermark(src, text) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.crossOrigin = 'Anonymous';
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    ctx.font = 'bold 36px Arial';
-                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-                    ctx.strokeStyle = 'black';
-                    ctx.lineWidth = 2;
-                    const x = 20;
-                    const y = canvas.height - 40;
-                    ctx.strokeText(text, x, y);
-                    ctx.fillText(text, x, y);
-                    resolve(canvas.toDataURL('image/jpeg'));
-                };
-                img.src = src;
-            });
-        }
-
-        window.nextAfterPhotos = () => {
-            if (vehiclePhotos.every(p => p !== null)) {
-                navigate('vehicleChecklist');
-            } else {
-                alert('Сделайте все 6 фото');
-            }
-        };
-
-        // ---------- Экран: Чек-лист ТС ----------
-        function renderVehicleChecklist(container) {
-            let html = `<p><strong>${currentVehicle.plate}</strong></p>`;
-            for (let i = 0; i < CHECK_POINTS.length; i++) {
-                const status = vehicleChecklist[i];
-                const statusClass = status === 'ok' ? 'ok' : 'problem';
-                const statusText = status === 'ok' ? '✅' : '❌';
-                html += `
-                    <div class="checklist-item">
-                        <div class="status ${statusClass}" onclick="toggleChecklistPoint(${i})">${statusText}</div>
-                        <div class="text">${i+1}. ${CHECK_POINTS[i]}</div>
-                    </div>
-                `;
-                if (status === 'problem' && problemComments[i]) {
-                    html += `<div class="comment-box">💬 ${problemComments[i]}</div>`;
-                }
-                if (status === 'problem' && problemPhotos[i]) {
-                    html += `<img src="${problemPhotos[i]}" class="photo-preview" style="max-width:100px; margin-left:46px;">`;
-                }
-            }
-            html += `<button class="button" onclick="completeChecklist()">👌 Осмотр проведен</button>`;
-            html += `<button class="button button-outline mt-2" onclick="navigate('vehiclePhotos')">🔙 Назад</button>`;
-            container.innerHTML = html;
-        }
-
-        window.toggleChecklistPoint = (index) => {
-            vehicleChecklist[index] = vehicleChecklist[index] === 'ok' ? 'problem' : 'ok';
-            if (vehicleChecklist[index] === 'ok') {
-                delete problemComments[index];
-                delete problemPhotos[index];
-            }
-            renderVehicleChecklist(document.getElementById('content'));
-        };
-
-        window.completeChecklist = () => {
-            // Проверяем, есть ли проблемные пункты без комментариев/фото
-            const problems = Object.entries(vehicleChecklist).filter(([idx, status]) => status === 'problem');
-            if (problems.length > 0) {
-                // Переходим к первому проблемному пункту для ввода комментария
-                currentProblemIndex = parseInt(problems[0][0]);
-                navigate('vehicleProblemComment', currentProblemIndex);
-            } else {
-                // Нет проблем — сохраняем проверку
-                finishVehicleCheck();
-            }
-        };
-
-        // ---------- Экран: Комментарий к проблеме ----------
-        function renderProblemComment(container, index) {
-            container.innerHTML = `
-                <p><strong>Пункт ${index+1}: ${CHECK_POINTS[index]}</strong></p>
-                <textarea id="problemComment" placeholder="Опишите проблему..." rows="4">${problemComments[index] || ''}</textarea>
-                <button class="button" onclick="saveProblemComment(${index})">Далее</button>
-                <button class="button button-outline mt-2" onclick="navigate('vehicleChecklist')">Пропустить</button>
-            `;
-        }
-
-        window.saveProblemComment = (index) => {
-            const comment = document.getElementById('problemComment').value.trim();
-            if (comment) {
-                problemComments[index] = comment;
-                // После комментария — запрос фото проблемы
-                navigate('vehicleProblemPhoto', index);
-            } else {
-                alert('Введите комментарий');
-            }
-        };
-
-        // ---------- Экран: Фото проблемы ----------
-        function renderProblemPhoto(container, index) {
-            container.innerHTML = `
-                <p><strong>Пункт ${index+1}: ${CHECK_POINTS[index]}</strong></p>
-                <div class="photo-item">
-                    <input type="file" accept="image/*" capture="environment" id="problemPhoto" onchange="handleProblemPhoto(${index}, event)">
-                    ${problemPhotos[index] ? `<img src="${problemPhotos[index]}" class="photo-preview">` : ''}
-                </div>
-                <button class="button" onclick="nextProblem(${index})">Далее</button>
-                <button class="button button-outline mt-2" onclick="skipProblemPhoto(${index})">Пропустить фото</button>
-                <button class="button button-outline mt-2" onclick="navigate('vehicleChecklist')">Назад к чек-листу</button>
-            `;
-        }
-
-        window.handleProblemPhoto = (index, event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                addWatermark(e.target.result, `${currentVehicle.plate} проблема п.${index+1} ${new Date().toLocaleString()}`).then(watermarked => {
-                    problemPhotos[index] = watermarked;
-                    renderProblemPhoto(document.getElementById('content'), index);
-                });
-            };
-            reader.readAsDataURL(file);
-        };
-
-        window.skipProblemPhoto = (index) => {
-            problemPhotos[index] = null;
-            nextProblem(index);
-        };
-
-        window.nextProblem = (index) => {
-            // Переходим к следующему проблемному пункту
-            const problems = Object.entries(vehicleChecklist).filter(([idx, status]) => status === 'problem' && parseInt(idx) > index);
-            if (problems.length > 0) {
-                currentProblemIndex = parseInt(problems[0][0]);
-                navigate('vehicleProblemComment', currentProblemIndex);
-            } else {
-                // Все проблемы обработаны
-                finishVehicleCheck();
-            }
-        };
-
-        function finishVehicleCheck() {
-            markVehicleChecked(currentVehicle.plate);
-            alert(`ТС ${currentVehicle.plate} проверено!`);
-            if (allVehiclesChecked()) {
-                alert('Все ТС ресторана проверены сегодня! Отчёт сформирован.');
-                // Здесь можно сгенерировать отчёт
-            }
-            navigate('vehicleList');
-        }
-
-        // ---------- Экран: Список блоков доставки ----------
-        function renderDeliveryBlocks(container) {
-            const checked = getCheckedDeliveryBlocks();
-            let html = `<p>Ресторан: <strong>${currentUser.restaurant}</strong></p>`;
-            DELIVERY_BLOCKS.forEach((block, idx) => {
-                const isChecked = checked.includes(block.name);
-                html += `
-                    <div class="list-item" onclick="selectDeliveryBlock(${idx})">
-                        <div>
-                            <div class="list-item-title">${block.name}</div>
-                            <div class="list-item-sub">${block.points} пунктов ${isChecked ? '✅' : ''}</div>
-                        </div>
-                        <span>➡️</span>
-                    </div>
-                `;
-            });
-            html += `<button class="button button-outline mt-4" onclick="navigate('restaurantOpen')">🔙 Назад</button>`;
-            container.innerHTML = html;
-        }
-
-        window.selectDeliveryBlock = (idx) => {
-            currentDeliveryBlockIndex = idx;
-            currentDeliveryPoint = 0;
-            navigate('deliveryBlockDetail', idx);
-        };
-
-        // ---------- Экран: Детали блока (по пунктам) ----------
-        function renderDeliveryBlockDetail(container, idx) {
-            const block = DELIVERY_BLOCKS[idx];
-            const pointIndex = currentDeliveryPoint;
-            if (pointIndex >= block.points) {
-                // Все пункты пройдены — запрашиваем комментарий
-                navigate('deliveryComment', idx);
-                return;
-            }
-            container.innerHTML = `
-                <p><strong>${block.name}</strong></p>
-                <p>Пункт ${pointIndex+1} из ${block.points}</p>
-                <p style="margin: 20px 0;">${getDeliveryPointText(block.name, pointIndex)}</p>
-                <button class="button" onclick="nextDeliveryPoint()">✅ Далее</button>
-                <button class="button button-outline mt-2" onclick="navigate('deliveryBlocks')">🔙 Назад</button>
-            `;
-        }
-
-        // Имитация текста пунктов (можно дополнить из блока)
-        function getDeliveryPointText(blockName, pointIndex) {
-            // Здесь можно вернуть реальный текст, для демо — заглушка
-            return `Проверьте пункт ${pointIndex+1} в блоке "${blockName}"`;
-        }
-
-        window.nextDeliveryPoint = () => {
-            currentDeliveryPoint++;
-            navigate('deliveryBlockDetail', currentDeliveryBlockIndex);
-        };
-
-        // ---------- Экран: Комментарий к блоку доставки ----------
-        function renderDeliveryComment(container, idx) {
-            const block = DELIVERY_BLOCKS[idx];
-            container.innerHTML = `
-                <p><strong>${block.name}</strong></p>
-                <textarea id="deliveryComment" placeholder="Оставьте комментарий" rows="4"></textarea>
-                <button class="button" onclick="completeDeliveryBlock(${idx})">✅ Завершить блок</button>
-                <button class="button button-outline mt-2" onclick="navigate('deliveryBlocks')">🔙 Назад</button>
-            `;
-        }
-
-        window.completeDeliveryBlock = (idx) => {
-            const block = DELIVERY_BLOCKS[idx];
-            const comment = document.getElementById('deliveryComment').value.trim() || 'Без комментария';
-            markDeliveryBlockChecked(block.name);
-            alert(`Блок "${block.name}" завершён. Комментарий: ${comment}`);
-            if (allDeliveryBlocksChecked()) {
-                alert('Все блоки доставки проверены! Отчёт готов.');
-            }
-            navigate('deliveryBlocks');
-        };
-
-        // ---------- Экран: База знаний (упрощённо) ----------
-        function renderKnowledgeBase(container) {
-            container.innerHTML = `
-                <div class="form-group">
-                    <input type="text" id="searchInput" placeholder="Введите запрос...">
-                </div>
-                <button class="button" onclick="searchKnowledge()">🔍 Поиск</button>
-                <div id="searchResults" style="margin-top: 20px;"></div>
-                <button class="button button-outline mt-4" onclick="navigate('mainMenu')">🔙 Назад</button>
-            `;
-        }
-
-        window.searchKnowledge = () => {
-            const query = document.getElementById('searchInput').value.trim();
-            const resultsDiv = document.getElementById('searchResults');
-            if (!query) {
-                resultsDiv.innerHTML = '<p>Введите запрос</p>';
-                return;
-            }
-            resultsDiv.innerHTML = `
-                <div class="list-item" onclick="alert('Скачивание стандарта...')">
-                    <div>📄 Стандарт доставки (версия 2.1)</div>
-                </div>
-                <div class="list-item" onclick="alert('Скачивание инструкции...')">
-                    <div>📄 Инструкция по проверке ТС</div>
-                </div>
-            `;
-        };
-
-        // ---------- Экран: Профиль ----------
-        function renderProfile(container) {
-            container.innerHTML = `
-                <p><strong>ФИО:</strong> ${currentUser.fullName}</p>
-                <p><strong>Должность:</strong> ${currentUser.position}</p>
-                <p><strong>Ресторан:</strong> ${currentUser.restaurant}</p>
-                <p><strong>ID:</strong> ${currentUser.userId}</p>
-                <p><strong>Дата регистрации:</strong> ${currentUser.registered || 'неизвестно'}</p>
-                <button class="button button-outline mt-4" onclick="navigate('mainMenu')">🔙 Назад</button>
-            `;
-        }
-
-        // ---------- Экран: Поддержка ----------
-        function renderSupport(container) {
-            container.innerHTML = `
-                <textarea id="supportMsg" placeholder="Опишите проблему..." rows="4"></textarea>
-                <button class="button mt-2" onclick="sendSupport()">📤 Отправить</button>
-                <button class="button button-outline mt-2" onclick="navigate('mainMenu')">🔙 Назад</button>
-            `;
-        }
-
-        window.sendSupport = () => {
-            const msg = document.getElementById('supportMsg').value.trim();
-            if (msg) {
-                alert('Сообщение отправлено администратору.');
-                document.getElementById('supportMsg').value = '';
-            } else {
-                alert('Введите сообщение');
-            }
-        };
-
-        // ---------- Экран: Админ панель (упрощённо) ----------
-        function renderAdminPanel(container) {
-            container.innerHTML = `
-                <p><strong>Статистика:</strong></p>
-                <p>Всего пользователей: 1 (текущий)</p>
-                <div class="list-item" onclick="alert('Удаление пользователя (демо)')">
-                    <span>🗑️ Удалить пользователя</span>
-                </div>
-                <div class="list-item" onclick="alert('Рассылка сообщения (демо)')">
-                    <span>📢 Сделать рассылку</span>
-                </div>
-                <button class="button button-outline mt-4" onclick="navigate('mainMenu')">🔙 Назад</button>
-            `;
-        }
-
-        // ---------- Обработчики навигации ----------
-        document.getElementById('backBtn').addEventListener('click', () => {
-            // Простая навигация назад (можно улучшить)
-            if (currentScreen === 'vehiclePhotos') navigate('vehicleList');
-            else if (currentScreen === 'vehicleChecklist') navigate('vehiclePhotos');
-            else if (currentScreen === 'vehicleProblemComment' || currentScreen === 'vehicleProblemPhoto') navigate('vehicleChecklist');
-            else if (currentScreen === 'deliveryBlockDetail') navigate('deliveryBlocks');
-            else if (currentScreen === 'deliveryComment') navigate('deliveryBlocks');
-            else if (currentScreen === 'deliveryBlocks') navigate('restaurantOpen');
-            else if (currentScreen === 'restaurantOpen') navigate('mainMenu');
-            else if (currentScreen === 'knowledgeBase') navigate('mainMenu');
-            else if (currentScreen === 'profile') navigate('mainMenu');
-            else if (currentScreen === 'support') navigate('mainMenu');
-            else if (currentScreen === 'adminPanel') navigate('mainMenu');
-            else navigate('mainMenu');
-        });
-
-        document.getElementById('menuBtn').addEventListener('click', () => {
-            navigate('mainMenu');
-        });
-
-        // Старт
-        loadUser();
-        navigate('mainMenu');
-    </script>
+    // инициализация языка
+    applyLanguage('ru');
+  </script>
 </body>
 </html>
